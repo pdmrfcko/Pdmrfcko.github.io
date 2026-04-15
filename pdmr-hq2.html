@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDMR HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#090909;--sf:#0f0f0f;--s2:#151515;--s3:#1a1a1a;
+  --br:#1e1e1e;--br2:#2a2a2a;
+  --tx:#e2e2da;--mu:#484848;--mu2:#686868;
+  --pdmr:#c8f542;--fcko:#ff6b35;--uco:#9b7fd4;--pha:#00d4aa;--pj:#f0c040;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:13px;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.tb{display:flex;align-items:center;padding:0 18px;border-bottom:1px solid var(--br);flex-shrink:0;background:var(--bg);z-index:20;overflow-x:auto;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-right:16px;padding:11px 0;flex-shrink:0;letter-spacing:.02em;}
+.logo span{color:var(--pdmr);}
+.nt{font-family:'Space Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;padding:8px 10px 12px;cursor:pointer;color:var(--mu2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .16s,border-color .16s;white-space:nowrap;user-select:none;flex-shrink:0;}
+.nt:hover{color:var(--tx);}
+.nt.a0{border-color:var(--mu2);color:var(--tx);}
+.nt.a1{border-color:var(--pdmr);color:var(--pdmr);}
+.nt.a2{border-color:var(--fcko);color:var(--fcko);}
+.nt.a3{border-color:var(--uco);color:var(--uco);}
+.nt.a4{border-color:var(--pha);color:var(--pha);}
+.nt.a5{border-color:var(--pj);color:var(--pj);}
+.tbr{margin-left:auto;display:flex;gap:7px;align-items:center;padding-left:10px;flex-shrink:0;}
+.ai-btn{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--pdmr);border-radius:2px;background:rgba(200,245,66,.06);color:var(--pdmr);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ai-btn:hover{background:rgba(200,245,66,.13);}
+.sb-toggle{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--br2);border-radius:2px;background:none;color:var(--mu2);cursor:pointer;transition:all .15s;}
+.sb-toggle:hover,.sb-toggle.on{border-color:var(--pdmr);color:var(--pdmr);}
+
+/* LAYOUT */
+.ws{display:flex;flex:1;overflow:hidden;}
+.main{flex:1;overflow-y:auto;padding:24px 28px;}
+.panel{display:none;animation:fi .18s ease;}
+.panel.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* WEEK ROTATOR */
+.week-rot{background:var(--sf);border:1px solid var(--br);border-radius:4px;padding:20px 24px;position:relative;overflow:hidden;display:flex;align-items:center;gap:20px;}
+.week-rot::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;}
+.wr-left{flex-shrink:0;}
+.wr-day-label{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.wr-day-name{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;letter-spacing:.02em;}
+.wr-day-desc{font-size:11px;color:var(--mu2);margin-top:4px;line-height:1.5;}
+.wr-center{flex:1;}
+.wr-week-strip{display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;}
+.wr-dot{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+.wr-dot-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.05em;text-transform:uppercase;border:1px solid;transition:transform .13s;cursor:default;}
+.wr-dot-circle.today{border-width:2px;transform:scale(1.12);}
+.wr-dot-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase;}
+.wr-right{flex-shrink:0;text-align:right;}
+.wr-week-num{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.wr-cycle-pos{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--mu2);}
+.wr-nav{display:flex;gap:5px;margin-top:8px;justify-content:flex-end;}
+.wr-nav button{background:none;border:1px solid var(--br2);border-radius:2px;color:var(--mu2);cursor:pointer;font-size:12px;padding:3px 8px;transition:all .13s;}
+.wr-nav button:hover{border-color:var(--mu2);color:var(--tx);}
+
+/* SIDEBAR */
+.sb{width:310px;border-left:1px solid var(--br);display:flex;flex-direction:column;background:var(--sf);overflow:hidden;transition:width .2s;flex-shrink:0;}
+.sb.closed{width:0;border-left:none;}
+.sb-hd{padding:11px 13px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sb-ti{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--mu2);}
+.sb-cl{background:none;border:none;color:var(--mu);cursor:pointer;font-size:13px;}
+.sb-cl:hover{color:var(--tx);}
+.sb-msgs{flex:1;overflow-y:auto;padding:11px 13px;display:flex;flex-direction:column;gap:8px;}
+.m-ai{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:8px 10px;font-size:11px;line-height:1.6;}
+.m-user{background:rgba(200,245,66,.06);border:1px solid rgba(200,245,66,.13);border-radius:3px;padding:8px 10px;font-size:11px;line-height:1.6;}
+.m-th{color:var(--mu);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.07em;animation:pl 1.4s infinite;}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.22}}
+.sb-inp{padding:9px 11px;border-top:1px solid var(--br);flex-shrink:0;}
+.sb-inp textarea{width:100%;background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 8px;outline:none;resize:none;height:58px;line-height:1.5;}
+.sb-inp textarea:focus{border-color:var(--mu2);}
+.sb-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+.sb-hint{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);}
+.sb-snd{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--pdmr);border-radius:2px;background:none;color:var(--pdmr);cursor:pointer;}
+.sb-snd:disabled{opacity:.4;cursor:default;}
+.qbs{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;}
+.qb{font-family:'Space Mono',monospace;font-size:6.5px;padding:2px 6px;border:1px solid var(--br2);border-radius:2px;background:none;color:var(--mu2);cursor:pointer;letter-spacing:.04em;}
+.qb:hover{border-color:var(--pdmr);color:var(--pdmr);}
+
+/* GRIDS / CARDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.g1{display:grid;grid-template-columns:1fr;gap:14px;}
+.wg{background:var(--sf);border:1px solid var(--br);border-radius:4px;padding:20px;}
+.wg.sp2{grid-column:span 2;}
+.wg.sp3{grid-column:span 3;}
+.wg.sp4{grid-column:span 4;}
+.wlbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.wlbl button{background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;transition:color .13s;}
+.wlbl button:hover{color:var(--pdmr);}
+
+/* HERO STATS */
+.hero{background:var(--sf);border:1px solid var(--br);border-radius:4px;padding:18px 20px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.h-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+.h-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;margin-bottom:3px;}
+.h-sub{font-size:11px;color:var(--mu2);}
+
+/* PERSONA CARDS */
+.pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+.pc{border:1px solid var(--br);border-radius:4px;padding:18px 16px;cursor:pointer;transition:transform .13s,border-color .16s;position:relative;overflow:hidden;}
+.pc:hover{transform:translateY(-2px);}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.pc-pdmr{background:rgba(200,245,66,.05);}.pc-pdmr::before{background:var(--pdmr);}.pc-pdmr:hover{border-color:var(--pdmr);}
+.pc-fcko{background:rgba(255,107,53,.05);}.pc-fcko::before{background:var(--fcko);}.pc-fcko:hover{border-color:var(--fcko);}
+.pc-uco{background:rgba(155,127,212,.05);}.pc-uco::before{background:var(--uco);}.pc-uco:hover{border-color:var(--uco);}
+.pc-pha{background:rgba(0,212,170,.05);}.pc-pha::before{background:var(--pha);}.pc-pha:hover{border-color:var(--pha);}
+.pc-pj{background:rgba(240,192,64,.05);}.pc-pj::before{background:var(--pj);}.pc-pj:hover{border-color:var(--pj);}
+.pcid{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.13em;text-transform:uppercase;margin-bottom:7px;}
+.pcnm{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;margin-bottom:5px;}
+.pcdesc{font-size:11px;color:var(--mu2);line-height:1.5;margin-bottom:10px;}
+.sbadge{display:inline-flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:rgba(255,255,255,.04);cursor:pointer;user-select:none;transition:transform .1s;}
+.sbadge:hover{transform:scale(1.04);}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.pulse{animation:pl2 2s infinite;}
+@keyframes pl2{0%,100%{opacity:1}50%{opacity:.18}}
+
+/* PROGRESS */
+.pr{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.prl{font-family:'Space Mono',monospace;font-size:9px;color:var(--mu2);width:60px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
+.prb{flex:1;height:4px;background:var(--s3);border-radius:2px;overflow:hidden;}
+.prf{height:100%;border-radius:2px;transition:width .5s ease;}
+.prv{font-family:'Space Mono',monospace;font-size:9px;color:var(--mu);width:32px;text-align:right;}
+
+/* TASKS / REMINDERS */
+.trow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--br);}
+.trow:last-child{border-bottom:none;}
+.tck{width:16px;height:16px;border:1px solid var(--mu);border-radius:2px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .14s;}
+.tck.dn{background:var(--pdmr);border-color:var(--pdmr);color:#000;}
+.ttx{flex:1;font-size:12px;}
+.ttx.dn{color:var(--mu);text-decoration:line-through;}
+.tptag{font-family:'Space Mono',monospace;font-size:8px;padding:2px 6px;border-radius:2px;border:1px solid;flex-shrink:0;}
+.tdue{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);flex-shrink:0;}
+.tdel,.rdel,.ep-del,.sc-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;opacity:0;transition:opacity .13s;}
+.trow:hover .tdel,.rrow:hover .rdel,.ep-card:hover .ep-del,.sc:hover .sc-del{opacity:1;}
+.rrow{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--br);}
+.rrow:last-child{border-bottom:none;}
+.rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.rtx{flex:1;font-size:12px;line-height:1.5;}
+.rtm{font-family:'Space Mono',monospace;font-size:9px;color:var(--mu);margin-top:2px;}
+
+/* TOM */
+.tom{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--br);font-size:12px;color:var(--mu2);line-height:1.5;}
+.tom:last-child{border-bottom:none;}
+.tomn{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);width:18px;flex-shrink:0;padding-top:2px;}
+.tomd{background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;margin-left:auto;opacity:0;flex-shrink:0;}
+.tom:hover .tomd{opacity:1;}
+
+/* STAT BOX */
+.srow{display:flex;gap:8px;}
+.sbox{flex:1;text-align:center;padding:10px 6px;background:var(--s2);border-radius:3px;}
+.snum{font-family:'Bebas Neue',sans-serif;font-size:24px;}
+.slbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.07em;text-transform:uppercase;}
+
+/* HIER */
+.hier{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-bottom:14px;}
+.hs{background:var(--s2);border:1px solid var(--br);padding:7px 12px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;}
+.ha{color:var(--mu);padding:0 5px;font-size:11px;}
+
+/* INPUT */
+.ir{display:flex;gap:6px;margin-top:8px;}
+.ir input,.ir select,.fi{background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 8px;outline:none;flex:1;}
+.ir input:focus,.ir select:focus,.fi:focus{border-color:var(--mu2);}
+.ir select option{background:var(--s2);}
+.bsm{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.07em;text-transform:uppercase;padding:5px 10px;border:1px solid var(--br2);border-radius:2px;background:none;color:var(--mu2);cursor:pointer;transition:all .13s;white-space:nowrap;}
+.bsm:hover,.bsm.ac{border-color:var(--pdmr);color:var(--pdmr);}
+.addb{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.07em;text-transform:uppercase;padding:5px 9px;border:1px dashed var(--br2);border-radius:2px;background:none;color:var(--mu);cursor:pointer;margin-top:8px;transition:color .13s,border-color .13s;}
+.addb:hover{color:var(--tx);border-color:var(--mu2);}
+
+/* BACK */
+.bk{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);cursor:pointer;margin-bottom:18px;padding:6px 10px;border:1px solid var(--br);border-radius:2px;background:none;transition:color .13s,border-color .13s;}
+.bk:hover{color:var(--tx);border-color:var(--mu2);}
+
+/* DETAIL HEADER */
+.dh{margin-bottom:20px;}
+.dtag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:6px;}
+.dname{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:.9;margin-bottom:8px;}
+.dsub{font-size:13px;color:var(--mu2);line-height:1.6;max-width:480px;}
+
+/* TAG */
+.tag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.05em;padding:3px 8px;border-radius:2px;border:1px solid;display:inline-block;margin:2px;}
+
+/* SERIES */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-bottom:14px;}
+.sc{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:14px 13px;cursor:pointer;transition:transform .13s,border-color .16s;position:relative;overflow:hidden;}
+.sc:hover{transform:translateY(-2px);}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.scid{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;}
+.scnm{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;margin-bottom:3px;}
+.scdesc{font-size:10px;color:var(--mu2);line-height:1.4;margin-bottom:8px;}
+.sc-stats{display:flex;gap:8px;}
+.sc-sn{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
+.sc-sl{font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;}
+.sc-pb{margin-top:7px;height:2px;background:var(--br2);border-radius:2px;overflow:hidden;}
+.sc-pf{height:100%;border-radius:2px;transition:width .5s ease;}
+.sc-add{border:1px dashed var(--br2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--mu);transition:color .13s,border-color .13s;min-height:100px;}
+.sc-add:hover{color:var(--tx);border-color:var(--mu2);}
+.sc-add-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;}
+
+/* SERIES DETAIL */
+.sd-stats{display:flex;gap:9px;margin-bottom:16px;flex-wrap:wrap;}
+.sd-sb{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:8px 12px;text-align:center;}
+.sd-sn{font-family:'Bebas Neue',sans-serif;font-size:24px;}
+.sd-sl{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;}
+.sd-desc{font-size:12px;color:var(--mu2);line-height:1.6;background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:8px 10px;margin-bottom:14px;outline:none;width:100%;}
+
+/* PROD STEPS */
+.steps-ed{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:12px;margin-bottom:14px;}
+.step-row{display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid var(--br);}
+.step-row:last-child{border-bottom:none;}
+.step-drag{color:var(--mu);font-size:9px;cursor:grab;padding:2px 0;flex-shrink:0;}
+.step-name{font-size:12px;font-weight:500;flex:1;outline:none;background:none;border:none;color:var(--tx);font-family:'DM Sans',sans-serif;}
+.step-name:focus{border-bottom:1px solid var(--mu2);}
+.step-tog{background:none;border:none;color:var(--mu2);cursor:pointer;font-size:8px;font-family:'Space Mono',monospace;letter-spacing:.05em;text-transform:uppercase;transition:color .13s;}
+.step-tog:hover{color:var(--tx);}
+.step-del2{background:none;border:none;color:var(--mu);cursor:pointer;font-size:9px;opacity:0;transition:opacity .13s;flex-shrink:0;}
+.step-row:hover .step-del2{opacity:1;}
+.substeps{padding-left:18px;margin-top:4px;flex-direction:column;gap:3px;display:none;}
+.ssr{display:flex;align-items:center;gap:5px;}
+.ssn{font-size:11px;color:var(--mu2);outline:none;background:none;border:none;font-family:'DM Sans',sans-serif;flex:1;}
+.ssn:focus{border-bottom:1px solid var(--mu);}
+.ssd{background:none;border:none;color:var(--mu);cursor:pointer;font-size:8px;opacity:0;}
+.ssr:hover .ssd{opacity:1;}
+.add-ss{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);background:none;border:none;cursor:pointer;padding:2px 0 2px 18px;}
+.add-ss:hover{color:var(--tx);}
+
+/* EPISODE BOARD */
+.ep-board{display:flex;gap:8px;overflow-x:auto;padding-bottom:7px;}
+.ep-col{flex-shrink:0;width:170px;background:var(--s2);border:1px solid var(--br);border-radius:3px;display:flex;flex-direction:column;}
+.ep-ch{padding:8px 9px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;}
+.ep-ct{font-family:'Space Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu2);}
+.ep-cc{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);background:var(--s3);padding:1px 5px;border-radius:9px;}
+.ep-cb{padding:6px;display:flex;flex-direction:column;gap:4px;min-height:44px;}
+.ep-card{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:8px;cursor:pointer;transition:border-color .13s;position:relative;}
+.ep-card:hover{border-color:var(--mu2);}
+.ep-num{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);margin-bottom:2px;}
+.ep-etitle{font-size:11px;line-height:1.3;margin-bottom:4px;}
+.ep-emeta{display:flex;flex-wrap:wrap;gap:3px;}
+.ep-etag{font-family:'Space Mono',monospace;font-size:6.5px;padding:1px 5px;border-radius:2px;border:1px solid var(--mu);color:var(--mu2);}
+.ep-add{margin:4px 6px 6px;padding:5px;border:1px dashed var(--br2);border-radius:2px;background:none;color:var(--mu);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.06em;cursor:pointer;text-align:center;}
+.ep-add:hover{color:var(--tx);border-color:var(--mu2);}
+
+/* PLATFORM TRACKER */
+.plt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+.plt-card{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:11px;position:relative;}
+.plt-icon{font-size:18px;margin-bottom:5px;}
+.plt-name{font-size:12px;font-weight:500;margin-bottom:2px;}
+.plt-handle{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu2);margin-bottom:6px;}
+.plt-status{font-family:'Space Mono',monospace;font-size:7px;padding:2px 7px;border-radius:2px;border:1px solid;cursor:pointer;user-select:none;}
+.plt-add{border:1px dashed var(--br2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--mu);transition:color .13s,border-color .13s;min-height:75px;border-radius:3px;}
+.plt-add:hover{color:var(--tx);border-color:var(--mu2);}
+.plt-del{position:absolute;top:6px;right:6px;background:none;border:none;color:var(--mu);cursor:pointer;font-size:9px;opacity:0;}
+.plt-card:hover .plt-del{opacity:1;}
+
+/* ANALYTICS */
+.al-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--br);cursor:pointer;}
+.al-row:last-child{border-bottom:none;}
+.al-row:hover{background:var(--s2);margin:0 -14px;padding:7px 14px;}
+.ar-rank{font-family:'Space Mono',monospace;font-size:7.5px;color:var(--mu);width:16px;flex-shrink:0;}
+.ar-title{flex:1;font-size:11px;line-height:1.3;}
+.ar-sub{font-size:9px;color:var(--mu2);margin-top:1px;}
+.ar-tag{font-family:'Space Mono',monospace;font-size:7px;padding:2px 5px;border-radius:2px;border:1px solid;flex-shrink:0;}
+.ar-stat{font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;min-width:36px;text-align:right;}
+.ar-bw{width:50px;flex-shrink:0;}
+.ar-b{height:3px;background:var(--br2);border-radius:2px;overflow:hidden;}
+.ar-f{height:100%;border-radius:2px;}
+
+/* HASHTAG CLOUD */
+.htag-cloud{display:flex;flex-wrap:wrap;gap:5px;}
+.htag{font-family:'Space Mono',monospace;letter-spacing:.04em;padding:3px 8px;border-radius:2px;border:1px solid;cursor:default;transition:transform .1s;}
+.htag:hover{transform:scale(1.04);}
+
+/* LOG TABLE */
+.log-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.log-tbl th{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.09em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--br);text-align:left;}
+.log-tbl td{padding:7px 0;border-bottom:1px solid rgba(30,30,30,.6);vertical-align:middle;}
+.log-tbl tr:last-child td{border-bottom:none;}
+.log-tbl .num{font-family:'Space Mono',monospace;font-size:9px;}
+
+/* AI INSIGHT */
+.ins-panel{background:var(--s2);border:1px solid var(--br2);border-radius:3px;padding:14px;min-height:100px;}
+.ins-msg{font-size:12px;line-height:1.7;}
+.ins-msg strong{color:var(--pdmr);}
+.ins-msg .itag{display:inline-block;font-family:'Space Mono',monospace;font-size:7.5px;padding:1px 5px;border:1px solid var(--pdmr);border-radius:2px;color:var(--pdmr);margin:1px;}
+.ins-input{background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 9px;outline:none;flex:1;}
+.ins-input:focus{border-color:var(--mu2);}
+.ins-btn{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--pdmr);border-radius:2px;background:rgba(200,245,66,.06);color:var(--pdmr);cursor:pointer;white-space:nowrap;}
+.ins-btn:hover{background:rgba(200,245,66,.13);}
+.ins-btn:disabled{opacity:.4;cursor:default;}
+.qas{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.qa{font-family:'Space Mono',monospace;font-size:7px;padding:2px 7px;border:1px solid var(--br2);border-radius:2px;background:none;color:var(--mu2);cursor:pointer;letter-spacing:.04em;}
+.qa:hover{border-color:var(--pdmr);color:var(--pdmr);}
+
+/* API SLOTS */
+.api-row{margin-bottom:9px;}
+.api-row .api-inp-row{display:flex;gap:5px;margin-top:4px;}
+.api-inp-row input{background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'Space Mono',monospace;font-size:8px;padding:4px 7px;outline:none;flex:1;letter-spacing:.04em;}
+.api-inp-row input:focus{border-color:var(--mu2);}
+.api-inp-row button{font-family:'Space Mono',monospace;font-size:7px;padding:4px 8px;border:1px solid var(--pdmr);border-radius:2px;background:rgba(200,245,66,.06);color:var(--pdmr);cursor:pointer;white-space:nowrap;}
+
+/* ARCH */
+.dvgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;}
+.dvc{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:10px 8px;text-align:center;}
+.dvi{font-size:15px;margin-bottom:5px;}
+.dvn{font-family:'Space Mono',monospace;font-size:8px;font-weight:700;margin-bottom:2px;letter-spacing:.04em;}
+.dvr{font-size:9px;color:var(--mu);}
+.ptbl{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:9px;}
+.ptbl th{text-align:left;color:var(--mu);padding:0 0 7px;border-bottom:1px solid var(--br);letter-spacing:.08em;text-transform:uppercase;font-size:8px;}
+.ptbl td{padding:7px 0;border-bottom:1px solid rgba(30,30,30,.6);vertical-align:middle;}
+
+/* CHART */
+.ch-wrap{position:relative;height:170px;}
+.ch-wrap.tall{height:220px;}
+
+/* SECTION HEAD */
+.sh{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--mu2);letter-spacing:.05em;margin-bottom:9px;}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.74);z-index:100;display:flex;align-items:center;justify-content:center;}
+.mo.hi{display:none;}
+.mw{background:var(--sf);border:1px solid var(--br2);border-radius:4px;width:500px;max-width:95vw;max-height:88vh;overflow-y:auto;padding:20px;}
+.mhd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.mtitle{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.02em;}
+.mcl{background:none;border:none;color:var(--mu2);font-size:14px;cursor:pointer;}
+.mcl:hover{color:var(--tx);}
+.mf{margin-bottom:10px;}
+.ml{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.mi{width:100%;background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 8px;outline:none;}
+.mi:focus{border-color:var(--mu2);}
+.mi.ta{resize:vertical;min-height:60px;line-height:1.5;}
+.mr2{display:flex;gap:6px;}
+.mr2 .mf{flex:1;}
+.ms{width:100%;background:var(--s2);border:1px solid var(--br2);border-radius:2px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 8px;outline:none;}
+.ms option{background:var(--s2);}
+.mbt{display:flex;gap:6px;justify-content:flex-end;margin-top:13px;}
+.mb{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;padding:5px 12px;border-radius:2px;cursor:pointer;transition:all .13s;}
+.mb.cn{background:none;border:1px solid var(--br2);color:var(--mu2);}
+.mb.cn:hover{color:var(--tx);}
+.mb.sv{background:var(--pdmr);border:1px solid var(--pdmr);color:#000;font-weight:700;}
+.mb.sv:hover{opacity:.86;}
+.tp{width:100%;height:75px;object-fit:cover;border-radius:2px;border:1px solid var(--br);margin-top:4px;display:none;}
+.tp.sh2{display:block;}
+
+/* VIDEO TRACKER CARDS (command) */
+.vid-card{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:border-color .13s;}
+.vid-card:last-child{margin-bottom:0;}
+.vid-card:hover{border-color:var(--mu2);}
+.vc-stage{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:2px;border:1px solid;flex-shrink:0;}
+.vc-title{font-size:11px;flex:1;line-height:1.3;}
+.vc-meta{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);flex-shrink:0;}
+
+/* SERIES PROGRESS (command) */
+.sp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.sp-name{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-bar{width:80px;height:4px;background:var(--s3);border-radius:2px;overflow:hidden;flex-shrink:0;}
+.sp-fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.sp-stat{font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);width:36px;text-align:right;flex-shrink:0;}
+.sp-badge{font-family:'Space Mono',monospace;font-size:7px;padding:1px 5px;border-radius:2px;border:1px solid;flex-shrink:0;}
+
+/* STATUS BADGES on ep cards and series cards */
+.stage-badge{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:.07em;text-transform:uppercase;padding:1px 5px;border-radius:2px;border:1px solid var(--mu);color:var(--mu2);display:inline-block;margin-top:3px;}
+.stage-badge.live{border-color:var(--pdmr);color:var(--pdmr);}
+.stage-badge.record{border-color:var(--fcko);color:var(--fcko);}
+.stage-badge.edit{border-color:var(--uco);color:var(--uco);}
+.stage-badge.script{border-color:var(--pj);color:var(--pj);}
+.stage-badge.review{border-color:var(--pha);color:var(--pha);}
+.stage-badge.publish{border-color:#aaa;color:#aaa;}
+
+/* ROADMAP TAB */
+.rm-year-switcher{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;}
+.rm-yr-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border:1px solid var(--br);border-radius:2px;background:none;color:var(--mu2);cursor:pointer;transition:all .14s;}
+.rm-yr-btn:hover{border-color:var(--mu2);color:var(--tx);}
+.rm-yr-btn.on{border-color:var(--pdmr);color:var(--pdmr);background:rgba(200,245,66,.06);}
+.rm-cal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.rm-month{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:11px 10px;min-height:120px;}
+.rm-month-head{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2);margin-bottom:8px;}
+.rm-series-chip{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.05em;padding:3px 7px;border-radius:2px;border:1px solid;margin-bottom:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.rm-series-chip:hover{transform:scale(1.02);}
+.rm-series-chip button{background:none;border:none;cursor:pointer;color:inherit;font-size:8px;opacity:0;transition:opacity .1s;}
+.rm-series-chip:hover button{opacity:1;}
+.rm-add-chip{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);background:none;border:1px dashed var(--br2);border-radius:2px;padding:2px 7px;cursor:pointer;width:100%;text-align:left;transition:color .13s,border-color .13s;margin-top:3px;}
+.rm-add-chip:hover{color:var(--tx);border-color:var(--mu2);}
+.rm-goals{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:14px;}
+.rm-goal-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--br);font-size:11px;color:var(--mu2);}
+.rm-goal-item:last-child{border-bottom:none;}
+.rm-goal-ck{width:14px;height:14px;border:1px solid var(--mu);border-radius:2px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .14s;margin-top:1px;}
+.rm-goal-ck.dn{background:var(--pdmr);border-color:var(--pdmr);color:#000;}
+.rm-goal-tx{flex:1;}
+.rm-goal-tx.dn{text-decoration:line-through;color:var(--mu);}
+.rm-goal-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:9px;opacity:0;transition:opacity .13s;}
+.rm-goal-item:hover .rm-goal-del{opacity:1;}
+.rm-summary{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.rm-sb{background:var(--s2);border:1px solid var(--br);border-radius:3px;padding:8px 12px;text-align:center;}
+.rm-sn{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+.rm-sl{font-family:'Space Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;}
+.rm-week-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:4px;margin-bottom:14px;}
+.rm-week{background:var(--s2);border:1px solid var(--br);border-radius:2px;padding:4px;min-height:50px;font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);cursor:pointer;transition:border-color .13s;}
+.rm-week:hover{border-color:var(--mu2);}
+.rm-week-num{margin-bottom:3px;letter-spacing:.06em;}
+.rm-week-dot{width:6px;height:6px;border-radius:50%;margin:1px 0;}
+
+.sfl{position:fixed;bottom:14px;right:14px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--pdmr);border:1px solid var(--pdmr);padding:5px 10px;border-radius:2px;background:var(--bg);opacity:0;transition:opacity .25s;pointer-events:none;z-index:999;}
+.sfl.show{opacity:1;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:2px;}
+.hi2{display:none!important;}
+hr.sep{border:none;border-top:1px solid var(--br);margin:11px 0;}
+</style>
+</head>
+<body>
+<div class="sfl" id="sfl">Saved ✓</div>
+
+<!-- ═══════════════ TOPBAR ═══════════════ -->
+<div class="tb">
+  <div class="logo">PDM<span>R</span> HQ</div>
+  <div class="nt a0" data-tab="command" onclick="goTab('command',this)">Command</div>
+  <div class="nt" data-tab="analytics" onclick="goTab('analytics',this)">Analytics</div>
+  <div class="nt" data-tab="intelligence" onclick="goTab('intelligence',this)">Intelligence</div>
+  <div class="nt" data-tab="tasks" onclick="goTab('tasks',this)">Tasks</div>
+  <div class="nt" data-tab="reminders" onclick="goTab('reminders',this)">Reminders</div>
+  <div class="nt" data-tab="series" onclick="goTab('series',this)">Series</div>
+  <div class="nt" data-tab="content" onclick="goTab('content',this)">Content</div>
+  <div class="nt" data-tab="pdmr" onclick="goTab('pdmr',this)">PDMR</div>
+  <div class="nt" data-tab="fcko" onclick="goTab('fcko',this)">FCKO</div>
+  <div class="nt" data-tab="uco" onclick="goTab('uco',this)">UCO</div>
+  <div class="nt" data-tab="pha" onclick="goTab('pha',this)">P.H.A</div>
+  <div class="nt" data-tab="pj" onclick="goTab('pj',this)">P.JUXT</div>
+  <div class="nt" data-tab="roadmap" onclick="goTab('roadmap',this)">Roadmap</div>
+  <div class="nt" data-tab="arch" onclick="goTab('arch',this)">Arch</div>
+  <div class="tbr">
+    <button class="ai-btn" onclick="goTab('intelligence',null);runAutoInsight()">✦ Analyze</button>
+    <button class="sb-toggle" id="sb-tog" onclick="toggleSB()">✦ AI Builder</button>
+  </div>
+</div>
+
+<!-- ═══════════════ WORKSPACE ═══════════════ -->
+<div class="ws">
+<div class="main" id="mainArea">
+
+<!-- ══ COMMAND ══ -->
+<div class="panel active" id="panel-command">
+  <div class="g5" style="margin-bottom:12px;">
+    <div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--pdmr)"></div><div class="h-lbl">Total Views</div><div class="h-num" id="hv">—</div><div class="h-sub">All platforms</div></div>
+    <div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--pha)"></div><div class="h-lbl">Engagements</div><div class="h-num" id="he">—</div><div class="h-sub">Likes + comments + shares</div></div>
+    <div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--fcko)"></div><div class="h-lbl">Followers Gained</div><div class="h-num" id="hf">—</div><div class="h-sub">Total logged</div></div>
+    <div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--uco)"></div><div class="h-lbl">Content Logged</div><div class="h-num" id="hc">—</div><div class="h-sub">Posts / vids / eps</div></div>
+    <div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--pj)"></div><div class="h-lbl">Avg Score</div><div class="h-num" id="hs">—</div><div class="h-sub">Performance (1–10)</div></div>
+  </div>
+  <div class="pgrid">
+    <div class="pc pc-pdmr" id="cmd-pdmr" onclick="goTab('pdmr',null)"><div class="pcid">01 · External</div><div class="pcnm" style="color:var(--pdmr)">PDMR</div><div id="cmd-pdmr-stats"></div></div>
+    <div class="pc pc-fcko" id="cmd-fcko" onclick="goTab('fcko',null)"><div class="pcid">02 · External</div><div class="pcnm" style="color:var(--fcko)">FCKO</div><div id="cmd-fcko-stats"></div></div>
+    <div class="pc pc-uco" id="cmd-uco" onclick="goTab('uco',null)"><div class="pcid">03 · External</div><div class="pcnm" style="color:var(--uco)">UCO</div><div id="cmd-uco-stats"></div></div>
+    <div class="pc pc-pha" id="cmd-pha" onclick="goTab('pha',null)"><div class="pcid">04 · Secret</div><div class="pcnm" style="color:var(--pha)">P.H.A</div><div id="cmd-pha-stats"></div></div>
+    <div class="pc pc-pj" id="cmd-pj" onclick="goTab('pj',null)"><div class="pcid">05 · Personal</div><div class="pcnm" style="color:var(--pj)">P.JUXT</div><div id="cmd-pj-stats"></div></div>
+  </div>
+
+  <!-- WEEK ROTATOR -->
+  <div id="week-rotator" style="margin-bottom:16px;"></div>
+
+  <!-- ROW 1: Series progress chart + video tracker -->
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="wg">
+      <div class="wlbl">Series Completion <button onclick="goTab('series',null)">View All →</button></div>
+      <div id="cmd-series-progress"></div>
+    </div>
+    <div class="wg">
+      <div class="wlbl">Content in Flight <button onclick="goTab('content',null)">View All →</button></div>
+      <div id="cmd-video-cards"></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Recent + hashtags -->
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="wg"><div class="wlbl">Recent Entries <button onclick="openLogMo()">+ Log</button></div><div id="recent-entries"></div></div>
+    <div class="wg"><div class="wlbl">Hashtag Cloud</div><div class="htag-cloud" id="htag-cloud"></div></div>
+  </div>
+
+  <!-- ROW 3: Progress bars + TOM + Hierarchy -->
+  <div class="g3">
+    <div class="wg"><div class="wlbl">Persona Progress</div>
+      <div class="pr"><div class="prl">PDMR</div><div class="prb"><div class="prf" style="width:70%;background:var(--pdmr)"></div></div><div class="prv">70%</div></div>
+      <div class="pr"><div class="prl">FCKO</div><div class="prb"><div class="prf" style="width:40%;background:var(--fcko)"></div></div><div class="prv">40%</div></div>
+      <div class="pr"><div class="prl">UCO</div><div class="prb"><div class="prf" style="width:55%;background:var(--uco)"></div></div><div class="prv">55%</div></div>
+      <div class="pr"><div class="prl">P.H.A</div><div class="prb"><div class="prf" style="width:25%;background:var(--pha)"></div></div><div class="prv">25%</div></div>
+      <div class="pr"><div class="prl">P.JUXT</div><div class="prb"><div class="prf" style="width:60%;background:var(--pj)"></div></div><div class="prv">60%</div></div>
+    </div>
+    <div class="wg"><div class="wlbl">Top of Mind <button onclick="addTOM()">+</button></div><div id="tom-list">
+      <div class="tom"><div class="tomn">01</div><div>Commit to lean tool stack — avoid 25+ app sprawl.</div><button class="tomd" onclick="delTOM(this)">✕</button></div>
+      <div class="tom"><div class="tomn">02</div><div>Refine brand identity across PDMR, P.H.A, UCO.</div><button class="tomd" onclick="delTOM(this)">✕</button></div>
+      <div class="tom"><div class="tomn">03</div><div>Lock down content strategy per persona.</div><button class="tomd" onclick="delTOM(this)">✕</button></div>
+    </div></div>
+    <div class="wg"><div class="wlbl">Hierarchy</div>
+      <div class="hier"><span class="hs">💻 Device</span><span class="ha">›</span><span class="hs">👤 Profile</span><span class="ha">›</span><span class="hs">🔑 Accounts</span><span class="ha">›</span><span class="hs">🛠 Tools</span><span class="ha">›</span><span class="hs">📣 Platform</span></div>
+      <div class="srow">
+        <div class="sbox"><div class="snum">5</div><div class="slbl">Personas</div></div>
+        <div class="sbox"><div class="snum">5</div><div class="slbl">Devices</div></div>
+        <div class="sbox"><div class="snum" id="cmd-done" style="color:var(--pdmr)">0</div><div class="slbl">Done Today</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANALYTICS ══ -->
+<div class="panel" id="panel-analytics">
+  <div class="g3" style="margin-bottom:11px;">
+    <div class="wg"><div class="wlbl">Views Over Time</div><div class="ch-wrap tall"><canvas id="ch-vt"></canvas></div></div>
+    <div class="wg"><div class="wlbl">Engagement Mix</div><div class="ch-wrap tall"><canvas id="ch-em"></canvas></div></div>
+    <div class="wg"><div class="wlbl">Content Types</div><div class="ch-wrap tall"><canvas id="ch-ct"></canvas></div></div>
+  </div>
+  <div class="g2" style="margin-bottom:11px;">
+    <div class="wg"><div class="wlbl">Persona Performance</div><div id="p-perf-bars"></div></div>
+    <div class="wg"><div class="wlbl">Platform Performance</div><div id="plat-perf-bars"></div></div>
+  </div>
+  <div class="wg"><div class="wlbl">Analytics Log <button onclick="openLogMo()">+ Add Entry</button></div>
+    <table class="log-tbl"><thead><tr><th>Title</th><th>Persona</th><th>Platform</th><th>Type</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Score</th><th>Date</th><th></th></tr></thead>
+    <tbody id="log-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ══ INTELLIGENCE ══ -->
+<div class="panel" id="panel-intelligence">
+  <div class="g2" style="margin-bottom:11px;">
+    <div class="wg sp2">
+      <div class="wlbl">AI Intelligence</div>
+      <div class="qas">
+        <button class="qa" onclick="askAI('What are my top performing hashtags and why?')">top hashtags</button>
+        <button class="qa" onclick="askAI('Which persona is performing best right now?')">best persona</button>
+        <button class="qa" onclick="askAI('What content type gets the most engagement?')">best content type</button>
+        <button class="qa" onclick="askAI('What hooks are working best across my content?')">best hooks</button>
+        <button class="qa" onclick="askAI('What should I post next based on my analytics?')">what to post next</button>
+        <button class="qa" onclick="askAI('Give me a hashtag strategy based on my data')">hashtag strategy</button>
+        <button class="qa" onclick="askAI('Which platform should I focus on most right now?')">best platform</button>
+        <button class="qa" onclick="askAI('Analyze my watch time and engagement rate')">engagement rate</button>
+      </div>
+      <div class="ins-panel" id="ins-panel"><div class="ins-msg" id="ins-msg">Your AI analyst is ready. Ask anything about your content — it reads all your logged analytics data and gives you actionable insights based on what's actually working across your personas.</div></div>
+      <div style="display:flex;gap:6px;margin-top:9px;">
+        <input class="ins-input" id="ins-inp" placeholder="Ask about your content, hashtags, platforms, strategy..." onkeydown="if(event.key==='Enter')askAI()" />
+        <button class="ins-btn" id="ins-btn" onclick="askAI()">Analyze ↗</button>
+      </div>
+    </div>
+  </div>
+  <div class="g3" style="margin-bottom:11px;">
+    <div class="wg"><div class="wlbl">Hashtag Intelligence</div><div id="htag-intel"></div></div>
+    <div class="wg"><div class="wlbl">Hook Performance</div><div id="hook-intel"></div></div>
+    <div class="wg"><div class="wlbl">Recommendations</div><div id="reco-intel" style="font-size:11px;color:var(--mu2);line-height:1.6;">Click Analyze or ask a question above to get recommendations.</div></div>
+  </div>
+  <div class="g2">
+    <div class="wg">
+      <div class="wlbl">Platform API Connections</div>
+      <div style="font-size:11px;color:var(--mu2);line-height:1.5;margin-bottom:10px;">Paste API keys to connect live analytics. Stored locally in your browser only.</div>
+      <div id="api-slots"></div>
+    </div>
+    <div class="wg">
+      <div class="wlbl">How to Get API Keys</div>
+      <div style="font-size:11px;color:var(--mu2);line-height:1.9;">
+        <div><span style="color:#ff4444;font-weight:500">YouTube</span> → Google Cloud Console → YouTube Data API v3 → Create Key</div>
+        <div><span style="color:var(--fcko);font-weight:500">Instagram</span> → Meta for Developers → Instagram Basic Display API</div>
+        <div><span style="color:var(--pha);font-weight:500">TikTok</span> → TikTok for Developers → Research API</div>
+        <div><span style="color:var(--pdmr);font-weight:500">Spotify</span> → Spotify for Developers → Create App → Client ID</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:8px;padding:7px;border:1px solid var(--br);border-radius:2px;">Once you have keys paste them above. The dashboard will auto-pull stats when opened.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TASKS ══ -->
+<div class="panel" id="panel-tasks">
+  <div class="g1">
+    <div class="wg">
+      <div class="wlbl">Production Tasks <button class="bsm" onclick="tog('add-task-area')" style="font-size:7px;">+ Add</button></div>
+      <div id="add-task-area" class="hi2"><div class="ir" style="margin-bottom:7px;">
+        <input id="tk-txt" placeholder="Task..." /><select id="tk-per"><option value="pdmr">PDMR</option><option value="fcko">FCKO</option><option value="uco">UCO</option><option value="pha">P.H.A</option><option value="pj">P.JUXT</option></select>
+        <input id="tk-due" type="date" style="flex:none;width:105px;" /><button class="bsm ac" onclick="addTask()">Add</button>
+      </div></div>
+      <div id="task-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REMINDERS ══ -->
+<div class="panel" id="panel-reminders">
+  <div class="g1">
+    <div class="wg">
+      <div class="wlbl">Reminders & Habits <button class="bsm" onclick="tog('add-rem-area')" style="font-size:7px;">+ Add</button></div>
+      <div id="add-rem-area" class="hi2"><div class="ir" style="margin-bottom:7px;">
+        <input id="rm-txt" placeholder="Reminder..." /><select id="rm-per"><option value="pdmr">PDMR</option><option value="fcko">FCKO</option><option value="uco">UCO</option><option value="pha">P.H.A</option><option value="pj">P.JUXT</option><option value="all">All</option></select>
+        <input id="rm-time" placeholder="Daily 9am..." /><button class="bsm ac" onclick="addRem()">Add</button>
+      </div></div>
+      <div id="rem-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SERIES ══ -->
+<div class="panel" id="panel-series">
+  <div id="series-list-view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;">Series</div><div style="font-size:11px;color:var(--mu2);margin-top:1px;">Click to open episode pipeline</div></div>
+      <button class="bsm ac" onclick="openSeriesMo(null)" style="padding:5px 11px;">+ New Series</button>
+    </div>
+    <div class="sgrid" id="series-grid-main"></div>
+  </div>
+  <div id="series-detail-view" style="display:none;"></div>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<div class="panel" id="panel-content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:7px;">
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;">Content Pipeline</div><div style="font-size:11px;color:var(--mu2);margin-top:1px;">All content across all personas</div></div>
+    <button class="bsm ac" onclick="openVidMo(null)" style="padding:5px 11px;">+ New Content</button>
+  </div>
+  <div style="display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap;" id="vp-filters">
+    <button class="bsm ac" data-vf="all" onclick="filterVids('all',this)">All</button>
+    <button class="bsm" data-vf="pdmr" onclick="filterVids('pdmr',this)" style="border-color:rgba(200,245,66,.3);color:var(--pdmr);">PDMR</button>
+    <button class="bsm" data-vf="fcko" onclick="filterVids('fcko',this)" style="border-color:rgba(255,107,53,.3);color:var(--fcko);">FCKO</button>
+    <button class="bsm" data-vf="uco" onclick="filterVids('uco',this)" style="border-color:rgba(155,127,212,.3);color:var(--uco);">UCO</button>
+    <button class="bsm" data-vf="pha" onclick="filterVids('pha',this)" style="border-color:rgba(0,212,170,.3);color:var(--pha);">P.H.A</button>
+    <button class="bsm" data-vf="pj" onclick="filterVids('pj',this)" style="border-color:rgba(240,192,64,.3);color:var(--pj);">P.JUXT</button>
+    <button class="bsm" data-vf="YouTube" onclick="filterVids('YouTube',this)">YouTube</button>
+    <button class="bsm" data-vf="Instagram" onclick="filterVids('Instagram',this)">Instagram</button>
+    <button class="bsm" data-vf="TikTok" onclick="filterVids('TikTok',this)">TikTok</button>
+    <button class="bsm" data-vf="Podcast" onclick="filterVids('Podcast',this)">Podcast</button>
+  </div>
+  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:7px;" id="vp-board">
+    <div class="ep-col" data-vs="Idea"><div class="ep-ch"><div class="ep-ct">💡 Idea</div><div class="ep-cc" id="vc-Idea">0</div></div><div class="ep-cb" id="vcol-Idea"></div><button class="ep-add" onclick="openVidMo('Idea')">+ Add</button></div>
+    <div class="ep-col" data-vs="Script"><div class="ep-ch"><div class="ep-ct">✍️ Script</div><div class="ep-cc" id="vc-Script">0</div></div><div class="ep-cb" id="vcol-Script"></div><button class="ep-add" onclick="openVidMo('Script')">+ Add</button></div>
+    <div class="ep-col" data-vs="Record"><div class="ep-ch"><div class="ep-ct">🎙 Record</div><div class="ep-cc" id="vc-Record">0</div></div><div class="ep-cb" id="vcol-Record"></div><button class="ep-add" onclick="openVidMo('Record')">+ Add</button></div>
+    <div class="ep-col" data-vs="Edit"><div class="ep-ch"><div class="ep-ct">✂️ Edit</div><div class="ep-cc" id="vc-Edit">0</div></div><div class="ep-cb" id="vcol-Edit"></div><button class="ep-add" onclick="openVidMo('Edit')">+ Add</button></div>
+    <div class="ep-col" data-vs="Review"><div class="ep-ch"><div class="ep-ct">👁 Review</div><div class="ep-cc" id="vc-Review">0</div></div><div class="ep-cb" id="vcol-Review"></div><button class="ep-add" onclick="openVidMo('Review')">+ Add</button></div>
+    <div class="ep-col" data-vs="Publish"><div class="ep-ch"><div class="ep-ct">📤 Publish</div><div class="ep-cc" id="vc-Publish">0</div></div><div class="ep-cb" id="vcol-Publish"></div><button class="ep-add" onclick="openVidMo('Publish')">+ Add</button></div>
+    <div class="ep-col" data-vs="Live"><div class="ep-ch"><div class="ep-ct">🟢 Live</div><div class="ep-cc" id="vc-Live">0</div></div><div class="ep-cb" id="vcol-Live"></div><button class="ep-add" onclick="openVidMo('Live')">+ Add</button></div>
+  </div>
+</div>
+
+<!-- ══ PERSONA PANELS ══ -->
+<div class="panel" id="panel-pdmr"><div id="pi-pdmr"></div></div>
+<div class="panel" id="panel-fcko"><div id="pi-fcko"></div></div>
+<div class="panel" id="panel-uco"><div id="pi-uco"></div></div>
+<div class="panel" id="panel-pha"><div id="pi-pha"></div></div>
+<div class="panel" id="panel-pj"><div id="pi-pj"></div></div>
+
+<!-- ══ ROADMAP ══ -->
+<div class="panel" id="panel-roadmap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;">Roadmap</div>
+      <div style="font-size:11px;color:var(--mu2);margin-top:1px;">Year-by-year content plan — series, goals, and calendar</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="bsm" onclick="addRoadmapYear()" style="font-size:7px;">+ Add Year</button>
+    </div>
+  </div>
+
+  <!-- YEAR SWITCHER -->
+  <div class="rm-year-switcher" id="rm-year-switcher"></div>
+
+  <!-- YEAR CONTENT (rendered dynamically) -->
+  <div id="rm-year-content"></div>
+</div>
+
+<!-- ══ ARCH ══ -->
+<div class="panel" id="panel-arch">
+  <div class="sh" style="margin-bottom:9px;">Hierarchy</div>
+  <div class="hier" style="margin-bottom:16px;"><span class="hs">💻 Device</span><span class="ha">›</span><span class="hs">👤 Profile</span><span class="ha">›</span><span class="hs">🔑 Accounts</span><span class="ha">›</span><span class="hs">🛠 Tools</span><span class="ha">›</span><span class="hs">📣 Platform</span></div>
+  <div class="sh" style="margin-bottom:9px;">Devices</div>
+  <div class="dvgrid" style="margin-bottom:16px;">
+    <div class="dvc"><div class="dvi">💻</div><div class="dvn">MacBook</div><div class="dvr">Central</div></div>
+    <div class="dvc"><div class="dvi">🖥</div><div class="dvn">Dell Laptop</div><div class="dvr">Content Loop</div></div>
+    <div class="dvc"><div class="dvi">🖥</div><div class="dvn">Dell PC</div><div class="dvr">Playground LAB</div></div>
+    <div class="dvc"><div class="dvi">📱</div><div class="dvn">iPhone 16 PM</div><div class="dvr">Personal</div></div>
+    <div class="dvc"><div class="dvi">📱</div><div class="dvn">iPhone 12</div><div class="dvr">Professional</div></div>
+  </div>
+  <div class="sh" style="margin-bottom:9px;">Persona Map</div>
+  <div class="wg"><table class="ptbl"><thead><tr><th>Persona</th><th>Layer</th><th>Focus</th><th>Status</th></tr></thead><tbody>
+    <tr><td style="color:var(--pdmr);font-weight:700">PDMR</td><td style="color:var(--mu2)">External</td><td style="color:var(--mu2)">Freelance, Publishing, Design</td><td style="text-align:right;color:var(--pdmr)">● Active</td></tr>
+    <tr><td style="color:var(--fcko);font-weight:700">FCKO Studio</td><td style="color:var(--mu2)">External</td><td style="color:var(--mu2)">Full Production Pipeline</td><td style="text-align:right;color:var(--fcko)">● Building</td></tr>
+    <tr><td style="color:var(--uco);font-weight:700">Unorthodox Co</td><td style="color:var(--mu2)">External</td><td style="color:var(--mu2)">Brand, Dev, Production</td><td style="text-align:right;color:var(--uco)">● Refining</td></tr>
+    <tr><td style="color:var(--pha);font-weight:700">P.H.A Love</td><td style="color:var(--mu2)">Internal/Secret</td><td style="color:var(--mu2)">Clinical Sound Design</td><td style="text-align:right;color:var(--pha)">● In Dev</td></tr>
+    <tr><td style="color:var(--pj);font-weight:700">Psych. Juxt.</td><td style="color:var(--mu2)">Internal/Personal</td><td style="color:var(--mu2)">Growth, PKM, School</td><td style="text-align:right;color:var(--pj)">● Base Layer</td></tr>
+  </tbody></table></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ══ AI SIDEBAR ══ -->
+<div class="sb closed" id="sidebar">
+  <div class="sb-hd"><div><div class="sb-ti">✦ AI Builder</div><div style="font-size:9px;color:var(--mu);margin-top:1px;">Describe what to build</div></div><button class="sb-cl" onclick="toggleSB()">✕</button></div>
+  <div class="sb-msgs" id="sb-msgs">
+    <div class="m-ai">Hey — tell me what to add or change and I'll build it live.<br><br>• "Add a habit tracker to P.JUXT"<br>• "Add a goals widget to command"<br>• "Add a client pipeline to UCO"</div>
+  </div>
+  <div class="sb-inp">
+    <div class="qbs">
+      <button class="qb" onclick="qp('Add a habit tracker to P.JUXT')">habit tracker</button>
+      <button class="qb" onclick="qp('Add a goals widget')">goals</button>
+      <button class="qb" onclick="qp('Add a client pipeline to UCO')">client pipeline</button>
+      <button class="qb" onclick="qp('Add a release tracker for P.H.A')">release tracker</button>
+    </div>
+    <textarea id="sb-inp" placeholder="Tell me what to build..." onkeydown="sbKd(event)"></textarea>
+    <div class="sb-row"><div class="sb-hint">Enter · Shift+Enter newline</div><button class="sb-snd" id="sb-btn" onclick="sendSB()">Send ↗</button></div>
+  </div>
+</div>
+</div><!-- /ws -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- Series -->
+<div class="mo hi" id="mo-series" onclick="cmo('mo-series',event)"><div class="mw">
+  <div class="mhd"><div class="mtitle" id="mo-series-title">New Series</div><button class="mcl" onclick="cmo('mo-series',null)">✕</button></div>
+  <div class="mf"><div class="ml">Name</div><input class="mi" id="sf-name" placeholder="e.g. Schizophonia" /></div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Persona</div><select class="ms" id="sf-p"><option value="pdmr">PDMR</option><option value="fcko">FCKO</option><option value="uco">UCO</option><option value="pha">P.H.A</option><option value="pj">P.JUXT</option></select></div>
+    <div class="mf"><div class="ml">Platform(s)</div><input class="mi" id="sf-plats" placeholder="YouTube, Podcast, IG..." /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Format</div><input class="mi" id="sf-fmt" placeholder="Long-form video, Audio..." /></div>
+    <div class="mf"><div class="ml">Status</div><select class="ms" id="sf-status"><option>In Dev</option><option>Active</option><option>On Hold</option><option>Completed</option></select></div>
+  </div>
+  <div class="mf"><div class="ml">Description</div><textarea class="mi ta" id="sf-desc" placeholder="What is this series about?"></textarea></div>
+  <div class="mf"><div class="ml">Production Steps (comma-separated)</div><input class="mi" id="sf-steps" placeholder="Idea, Script, Record, Edit, Review, Publish, Live" /></div>
+  <input type="hidden" id="sf-id" /><div class="mbt"><button class="mb cn" onclick="cmo('mo-series',null)">Cancel</button><button class="mb sv" onclick="saveSeries()">Save</button></div>
+</div></div>
+
+<!-- Episode -->
+<div class="mo hi" id="mo-ep" onclick="cmo('mo-ep',event)"><div class="mw">
+  <div class="mhd"><div class="mtitle" id="mo-ep-title">New Episode</div><button class="mcl" onclick="cmo('mo-ep',null)">✕</button></div>
+  <div class="mr2">
+    <div class="mf" style="flex:0 0 72px;"><div class="ml">Ep #</div><input class="mi" id="ef-num" type="number" min="1" placeholder="01" /></div>
+    <div class="mf"><div class="ml">Title</div><input class="mi" id="ef-title" placeholder="Episode title..." /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Stage</div><select class="ms" id="ef-stage"></select></div>
+    <div class="mf"><div class="ml">Platform(s)</div><input class="mi" id="ef-plats" placeholder="YouTube, Podcast..." /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Record Date</div><input class="mi" type="date" id="ef-rec" /></div>
+    <div class="mf"><div class="ml">Publish Date</div><input class="mi" type="date" id="ef-pub" /></div>
+  </div>
+  <div class="mf"><div class="ml">Thumbnail URL</div><input class="mi" id="ef-thumb" placeholder="Paste image URL..." oninput="pt(this.value,'ef-tp')" /><img class="tp" id="ef-tp" src="" /></div>
+  <div class="mf"><div class="ml">Script / Links</div><input class="mi" id="ef-links" placeholder="Drive link, script doc..." /></div>
+  <div class="mf"><div class="ml">Notes / Hooks</div><textarea class="mi ta" id="ef-notes" placeholder="Ideas, angles, hooks..."></textarea></div>
+  <input type="hidden" id="ef-id" /><input type="hidden" id="ef-sid" /><div class="mbt"><button class="mb cn" onclick="cmo('mo-ep',null)">Cancel</button><button class="mb sv" onclick="saveEp()">Save</button></div>
+</div></div>
+
+<!-- Video/Content -->
+<div class="mo hi" id="mo-vid" onclick="cmo('mo-vid',event)"><div class="mw">
+  <div class="mhd"><div class="mtitle" id="mo-vid-title">New Content</div><button class="mcl" onclick="cmo('mo-vid',null)">✕</button></div>
+  <div class="mf"><div class="ml">Title</div><input class="mi" id="vf-title" placeholder="Content title..." /></div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Persona</div><select class="ms" id="vf-p"><option value="pdmr">PDMR</option><option value="fcko">FCKO</option><option value="uco">UCO</option><option value="pha">P.H.A</option><option value="pj">P.JUXT</option></select></div>
+    <div class="mf"><div class="ml">Platform(s)</div><input class="mi" id="vf-plats" placeholder="YouTube, IG, Podcast..." /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Stage</div><select class="ms" id="vf-stage"><option>Idea</option><option>Script</option><option>Record</option><option>Edit</option><option>Review</option><option>Publish</option><option>Live</option></select></div>
+    <div class="mf"><div class="ml">Series</div><input class="mi" id="vf-series" placeholder="Series name..." /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Shoot Date</div><input class="mi" type="date" id="vf-shoot" /></div>
+    <div class="mf"><div class="ml">Publish Date</div><input class="mi" type="date" id="vf-pub" /></div>
+  </div>
+  <div class="mf"><div class="ml">Thumbnail URL</div><input class="mi" id="vf-thumb" placeholder="Paste image URL..." oninput="pt(this.value,'vf-tp')" /><img class="tp" id="vf-tp" src="" /></div>
+  <div class="mf"><div class="ml">Links</div><input class="mi" id="vf-links" placeholder="Drive link, refs..." /></div>
+  <div class="mf"><div class="ml">Notes</div><textarea class="mi ta" id="vf-notes" placeholder="Ideas, angles, hooks..."></textarea></div>
+  <input type="hidden" id="vf-id" /><div class="mbt"><button class="mb cn" onclick="cmo('mo-vid',null)">Cancel</button><button class="mb sv" onclick="saveVid()">Save</button></div>
+</div></div>
+
+<!-- Analytics Log -->
+<div class="mo hi" id="mo-log" onclick="cmo('mo-log',event)"><div class="mw">
+  <div class="mhd"><div class="mtitle">Log Content Entry</div><button class="mcl" onclick="cmo('mo-log',null)">✕</button></div>
+  <div class="mf"><div class="ml">Title</div><input class="mi" id="lf-title" placeholder="Content title..." /></div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Persona</div><select class="ms" id="lf-p"><option value="pdmr">PDMR</option><option value="fcko">FCKO</option><option value="uco">UCO</option><option value="pha">P.H.A</option><option value="pj">P.JUXT</option></select></div>
+    <div class="mf"><div class="ml">Platform</div><select class="ms" id="lf-plat"><option>YouTube</option><option>Instagram</option><option>TikTok</option><option>Podcast</option><option>Twitter/X</option><option>Spotify</option><option>Website</option></select></div>
+    <div class="mf"><div class="ml">Type</div><select class="ms" id="lf-type"><option>Video</option><option>Short</option><option>Post</option><option>Story</option><option>Podcast Ep</option><option>Audio</option><option>Other</option></select></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Series</div><input class="mi" id="lf-series" placeholder="Series name..." /></div>
+    <div class="mf"><div class="ml">Post Date</div><input class="mi" type="date" id="lf-date" /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Views</div><input class="mi" id="lf-views" type="number" min="0" placeholder="0" /></div>
+    <div class="mf"><div class="ml">Likes</div><input class="mi" id="lf-likes" type="number" min="0" placeholder="0" /></div>
+    <div class="mf"><div class="ml">Comments</div><input class="mi" id="lf-comments" type="number" min="0" placeholder="0" /></div>
+    <div class="mf"><div class="ml">Shares</div><input class="mi" id="lf-shares" type="number" min="0" placeholder="0" /></div>
+  </div>
+  <div class="mr2">
+    <div class="mf"><div class="ml">Watch Time (min)</div><input class="mi" id="lf-wt" type="number" min="0" placeholder="0" /></div>
+    <div class="mf"><div class="ml">Followers Gained</div><input class="mi" id="lf-fol" type="number" placeholder="0" /></div>
+    <div class="mf"><div class="ml">Score (1–10)</div><input class="mi" id="lf-score" type="number" min="1" max="10" placeholder="7" /></div>
+  </div>
+  <div class="mf"><div class="ml">Hashtags</div><input class="mi" id="lf-htags" placeholder="#pdmr #series #content..." /></div>
+  <div class="mf"><div class="ml">Hook Used</div><input class="mi" id="lf-hook" placeholder="First line / opening hook..." /></div>
+  <div class="mf"><div class="ml">Notes</div><textarea class="mi ta" id="lf-notes" placeholder="What worked, what didn't..."></textarea></div>
+  <input type="hidden" id="lf-id" /><div class="mbt"><button class="mb cn" onclick="cmo('mo-log',null)">Cancel</button><button class="mb sv" onclick="saveLog()">Save Entry</button></div>
+</div></div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONSTANTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+const PCOL={pdmr:'#c8f542',fcko:'#ff6b35',uco:'#9b7fd4',pha:'#00d4aa',pj:'#f0c040'};
+const PNAMES={pdmr:'PDMR',fcko:'FCKO',uco:'UCO',pha:'P.H.A',pj:'P.JUXT'};
+const PDESCS={pdmr:'Artist · Designer · Producer',fcko:'Content Studio',uco:'Creative Agency',pha:'Clinical Sound Design',pj:'Personal · PKM · Growth'};
+const PNUMS={pdmr:'01 · External',fcko:'02 · External',uco:'03 · External',pha:'04 · Internal / Secret',pj:'05 · Internal / Personal'};
+const PPARA={
+  pdmr:'Multidisciplinary artist, designer, and media producer. Central professional interface managing freelance work and publishing.',
+  fcko:'Content-first creative studio managing the full production pipeline across all media formats.',
+  uco:'Unorthodox Co — disruptive creative studio providing brand, development, and production services.',
+  pha:'Secret music persona. Clinical sound design rooted in occult frequencies — sound as physical feeling.',
+  pj:'Psychonautic Juxtaposition — foundational personal layer. Growth, school, PKM, herbalism, fitness, Python, frequencies.'
+};
+const STATUSES=['Active','Building','Refining','In Dev','On Hold','Done','Base Layer'];
+const SCOL={Active:'#c8f542',Building:'#ff6b35',Refining:'#9b7fd4','In Dev':'#00d4aa','On Hold':'#484848','Done':'#686868','Base Layer':'#f0c040'};
+const TAB_CLS={command:'a0',analytics:'a0',intelligence:'a0',tasks:'a0',reminders:'a0',series:'a0',content:'a0',pdmr:'a1',fcko:'a2',uco:'a3',pha:'a4',pj:'a5',arch:'a0',roadmap:'a0'};
+const DEFAULT_STEPS=[
+  {name:'Idea',substeps:['Concept brainstorm','Angle/hook','Feasibility check']},
+  {name:'Script',substeps:['Research','Rough draft','Final draft','Review']},
+  {name:'Record',substeps:['Setup & gear check','Record session','Backup files']},
+  {name:'Edit',substeps:['Assembly cut','Fine cut','Color/audio grade','Thumbnail']},
+  {name:'Review',substeps:['Self review','Peer review','Final sign-off']},
+  {name:'Publish',substeps:['Upload','SEO/metadata','Schedule']},
+  {name:'Live',substeps:['Posted','Analytics check']}
+];
+const PLT_STATUSES=['Active','Setting Up','Planned','On Hold'];
+const VSTAGES=['Idea','Script','Record','Edit','Review','Publish','Live'];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+let seriesList=[], episodes={}, platforms={}, videos=[], analyticsLog=[], roadmapData={};
+let currentSeries=null, vpFilter='all', sbOpen=false, saveTimer=null, activeRmYear=null;
+let charts={};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  NAV
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function goTab(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nt').forEach(t=>{t.className='nt';});
+  document.getElementById('panel-'+name)?.classList.add('active');
+  const tab=el||document.querySelector('[data-tab="'+name+'"]');
+  if(tab) tab.classList.add(TAB_CLS[name]||'a0');
+  if(['pdmr','fcko','uco','pha','pj'].includes(name)) renderPersona(name);
+  if(name==='analytics') renderAnalytics();
+  if(name==='intelligence') renderIntelligence();
+  if(name==='command') renderCommand();
+  if(name==='roadmap') renderRoadmap();
+  window.scrollTo({top:0});
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANALYTICS COMPUTE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function tot(k){return analyticsLog.reduce((s,e)=>s+(parseFloat(e[k])||0),0);}
+function computeStats(){
+  const sc=analyticsLog.filter(e=>e.score);
+  return{views:tot('views'),likes:tot('likes'),comments:tot('comments'),shares:tot('shares'),followers:tot('followers'),
+    eng:tot('likes')+tot('comments')+tot('shares'),count:analyticsLog.length,
+    avgScore:sc.length?sc.reduce((s,e)=>s+(parseFloat(e.score)||0),0)/sc.length:0};
+}
+function byP(){const r={};analyticsLog.forEach(e=>{if(!r[e.persona])r[e.persona]={views:0,eng:0,count:0,followers:0};r[e.persona].views+=parseFloat(e.views)||0;r[e.persona].eng+=(parseFloat(e.likes)||0)+(parseFloat(e.comments)||0)+(parseFloat(e.shares)||0);r[e.persona].count++;r[e.persona].followers+=parseFloat(e.followers)||0;});return r;}
+function byPlat(){const r={};analyticsLog.forEach(e=>{if(!r[e.platform])r[e.platform]={views:0,eng:0,count:0};r[e.platform].views+=parseFloat(e.views)||0;r[e.platform].eng+=(parseFloat(e.likes)||0)+(parseFloat(e.comments)||0)+(parseFloat(e.shares)||0);r[e.platform].count++;});return r;}
+function htFreq(){const r={};analyticsLog.forEach(e=>{if(!e.hashtags)return;(e.hashtags.match(/#\w+/g)||[]).forEach(t=>{const tl=t.toLowerCase();if(!r[tl])r[tl]={count:0,totalViews:0,totalEng:0};r[tl].count++;r[tl].totalViews+=parseFloat(e.views)||0;r[tl].totalEng+=(parseFloat(e.likes)||0)+(parseFloat(e.comments)||0)+(parseFloat(e.shares)||0);});});return r;}
+function bySer(){const r={};analyticsLog.forEach(e=>{if(!e.series)return;if(!r[e.series])r[e.series]={views:0,eng:0,count:0};r[e.series].views+=parseFloat(e.views)||0;r[e.series].eng+=(parseFloat(e.likes)||0)+(parseFloat(e.comments)||0)+(parseFloat(e.shares)||0);r[e.series].count++;});return r;}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toString();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  COMMAND PANEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderCommand(){
+  renderWeekRotator();
+  const st=computeStats();
+  document.getElementById('hv').textContent=st.count?fmt(st.views):'—';
+  document.getElementById('he').textContent=st.count?fmt(st.eng):'—';
+  document.getElementById('hf').textContent=st.count?fmt(st.followers):'—';
+  document.getElementById('hc').textContent=st.count||'—';
+  document.getElementById('hs').textContent=st.avgScore?st.avgScore.toFixed(1):'—';
+
+  // persona strip stats
+  const bp=byP();
+  ['pdmr','fcko','uco','pha','pj'].forEach(p=>{
+    const d=bp[p]||{views:0,eng:0,count:0};
+    const el=document.getElementById('cmd-'+p+'-stats');
+    if(el) el.innerHTML=`<div style="font-size:10px;color:var(--mu2);margin-bottom:7px;">${PDESCS[p]}</div><div style="display:flex;gap:8px;"><div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${PCOL[p]}">${fmt(d.views)}</div><div style="font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">Views</div></div><div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:18px">${fmt(d.eng)}</div><div style="font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">Eng</div></div><div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:18px">${d.count}</div><div style="font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">Posts</div></div></div>`;
+  });
+
+  // Series completion progress
+  const spEl=document.getElementById('cmd-series-progress');
+  if(spEl){
+    if(seriesList.length===0){
+      spEl.innerHTML='<div style="font-size:11px;color:var(--mu2);padding:8px 0;">No series yet — add series in the Series tab.</div>';
+    } else {
+      const stageColors={'Idea':'var(--mu)','Script':'var(--pj)','Record':'var(--fcko)','Edit':'var(--uco)','Review':'var(--pha)','Publish':'#aaa','Live':'var(--pdmr)'};
+      spEl.innerHTML=seriesList.map(s=>{
+        const eps=episodes[s.id]||[];const live=eps.filter(e=>e.stage==='Live').length;
+        const inProd=eps.filter(e=>e.stage!=='Live'&&e.stage!=='Idea').length;
+        const pct=eps.length?Math.round(live/eps.length*100):0;
+        const col=PCOL[s.persona]||'var(--mu)';
+        const stageCounts={};eps.forEach(e=>{stageCounts[e.stage]=(stageCounts[e.stage]||0)+1;});
+        const topStage=Object.entries(stageCounts).sort((a,b)=>b[1]-a[1])[0];
+        const sc=getStageClass(topStage?topStage[0]:'');
+        return`<div class="sp-row" onclick="openSeriesDetail('${s.id}')" style="cursor:pointer">
+          <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></div>
+          <div class="sp-name">${s.name}</div>
+          ${topStage?`<span class="sp-badge ${sc}" style="color:${stageColors[topStage[0]]||'var(--mu)'};border-color:${stageColors[topStage[0]]||'var(--mu)'}">${topStage[0]}</span>`:''}
+          <div class="sp-bar"><div class="sp-fill" style="width:${pct}%;background:${col}"></div></div>
+          <div class="sp-stat">${live}/${eps.length} live</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Video tracker cards — show in-flight content (not Live, not Idea)
+  const vcEl=document.getElementById('cmd-video-cards');
+  if(vcEl){
+    const inFlight=videos.filter(v=>v.stage!=='Live'&&v.stage!=='Idea').slice(0,6);
+    const stageColors={'Script':'var(--pj)','Record':'var(--fcko)','Edit':'var(--uco)','Review':'var(--pha)','Publish':'#aaa'};
+    vcEl.innerHTML=inFlight.length?inFlight.map(v=>{
+      const col=PCOL[v.persona]||'#888';const sc=stageColors[v.stage]||'var(--mu)';
+      return`<div class="vid-card" onclick="openVidMo(null,'${v.id}')">
+        <div class="vc-stage" style="color:${sc};border-color:${sc}">${v.stage}</div>
+        <div class="vc-title">${v.title}</div>
+        <div class="vc-meta" style="color:${col}">${v.persona.toUpperCase()}</div>
+      </div>`;
+    }).join(''):'<div style="font-size:11px;color:var(--mu2);padding:8px 0;">No content in production — add content in the Content tab.</div>';
+  }
+
+  // Recent analytics entries
+  const rec=[...analyticsLog].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,5);
+  document.getElementById('recent-entries').innerHTML=rec.length?rec.map(e=>{const col=PCOL[e.persona]||'#888';return`<div class="al-row"><div><div class="ar-title">${e.title}</div><div class="ar-sub">${e.platform} · ${e.date||''}</div></div><span class="ar-tag" style="color:${col};border-color:${col}">${(e.persona||'').toUpperCase()}</span><div class="ar-stat" style="color:${col}">${fmt(e.views||0)}</div></div>`;}).join(''):'<div style="font-size:11px;color:var(--mu2);padding:8px 0;">No entries yet — click "+ Log" to start.</div>';
+
+  // Hashtag cloud
+  const ht=htFreq();const st2=Object.entries(ht).sort((a,b)=>b[1].count-a[1].count).slice(0,18);
+  const maxHC=Math.max(...st2.map(t=>t[1].count),1);
+  const hcols=['var(--pdmr)','var(--pha)','var(--fcko)','var(--uco)','var(--pj)'];
+  document.getElementById('htag-cloud').innerHTML=st2.length?st2.map(([tag,d],i)=>`<div class="htag" style="font-size:${8+Math.round(d.count/maxHC*7)}px;color:${hcols[i%5]};border-color:${hcols[i%5]}30;opacity:${0.5+d.count/maxHC*0.5}">${tag}</div>`).join(''):'<div style="font-size:11px;color:var(--mu2);">No hashtags logged yet.</div>';
+}
+
+function getStageClass(stage){
+  const m={'Live':'live','Record':'record','Edit':'edit','Script':'script','Review':'review','Publish':'publish'};
+  return m[stage]||'';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANALYTICS PANEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderAnalytics(){
+  const sorted=[...analyticsLog].filter(e=>e.date).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  dch('ch-vt');dch('ch-em');dch('ch-ct');
+  mkLine('ch-vt',sorted.map(e=>e.date),[{label:'Views',data:sorted.map(e=>parseFloat(e.views)||0),color:'#c8f542'}]);
+  const st=computeStats();
+  mkDonut('ch-em',['Likes','Comments','Shares'],[st.likes,st.comments,st.shares],['#c8f542','#ff6b35','#9b7fd4']);
+  const tc={};analyticsLog.forEach(e=>{tc[e.type]=(tc[e.type]||0)+1;});
+  const tk=Object.keys(tc);mkDonut('ch-ct',tk,tk.map(k=>tc[k]));
+  const bp=byP();const ps=['pdmr','fcko','uco','pha','pj'];const maxPV=Math.max(...ps.map(p=>bp[p]?.views||0),1);
+  document.getElementById('p-perf-bars').innerHTML=ps.map(p=>{const d=bp[p]||{views:0};return`<div class="pr"><div class="prl">${PNAMES[p]}</div><div class="prb"><div class="prf" style="width:${Math.round(d.views/maxPV*100)}%;background:${PCOL[p]}"></div></div><div class="prv">${fmt(d.views)}</div></div>`;}).join('');
+  const pl=byPlat();const pk=Object.keys(pl).filter(k=>pl[k].views>0).sort((a,b)=>pl[b].views-pl[a].views);const maxPlV=Math.max(...pk.map(k=>pl[k].views),1);
+  document.getElementById('plat-perf-bars').innerHTML=pk.length?pk.map(k=>`<div class="pr"><div class="prl">${k}</div><div class="prb"><div class="prf" style="width:${Math.round(pl[k].views/maxPlV*100)}%;background:var(--mu2)"></div></div><div class="prv">${fmt(pl[k].views)}</div></div>`).join(''):'<div style="font-size:11px;color:var(--mu2);">No platform data yet.</div>';
+  const sorted2=[...analyticsLog].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  document.getElementById('log-tbody').innerHTML=sorted2.map(e=>{const col=PCOL[e.persona]||'#888';return`<tr><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.title}</td><td><span class="log-tbl" style="font-family:'Space Mono',monospace;font-size:7px;padding:2px 5px;border-radius:2px;border:1px solid ${col};color:${col}">${(e.persona||'').toUpperCase()}</span></td><td style="color:var(--mu2)">${e.platform||''}</td><td style="color:var(--mu2)">${e.type||''}</td><td class="num" style="color:var(--pdmr)">${fmt(e.views||0)}</td><td class="num">${fmt(e.likes||0)}</td><td class="num">${fmt(e.comments||0)}</td><td class="num">${fmt(e.shares||0)}</td><td class="num" style="color:${(e.score||0)>=8?'var(--pdmr)':(e.score||0)>=5?'var(--pj)':'var(--mu2)'}">${e.score||'—'}</td><td style="color:var(--mu2);font-family:'Space Mono',monospace;font-size:8px">${e.date||''}</td><td><button style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:9px" onclick="delLog('${e.id}')">✕</button></td></tr>`;}).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INTELLIGENCE PANEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderIntelligence(){
+  const ht=htFreq();const sh=Object.entries(ht).sort((a,b)=>b[1].totalViews-a[1].totalViews).slice(0,10);
+  const hcols=['var(--pdmr)','var(--pha)','var(--fcko)','var(--uco)','var(--pj)'];
+  document.getElementById('htag-intel').innerHTML=sh.length?sh.map(([tag,d],i)=>`<div class="al-row"><div class="ar-rank" style="color:${hcols[i%5]}">${i+1}</div><div><div class="ar-title">${tag}</div><div class="ar-sub">${d.count} uses · ${fmt(d.totalViews)} views</div></div><div class="ar-stat" style="color:${hcols[i%5]}">${fmt(d.totalEng)}</div></div>`).join(''):'<div style="font-size:11px;color:var(--mu2);">Log content with hashtags to see intelligence.</div>';
+  const hooks=analyticsLog.filter(e=>e.hook).sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+  document.getElementById('hook-intel').innerHTML=hooks.length?hooks.map((e,i)=>`<div class="al-row"><div class="ar-rank">${i+1}</div><div><div class="ar-title" style="font-style:italic">"${e.hook}"</div><div class="ar-sub">${e.title} · ${fmt(e.views||0)} views</div></div></div>`).join(''):'<div style="font-size:11px;color:var(--mu2);">Log content with hooks to see performance.</div>';
+  document.getElementById('api-slots').innerHTML=['YouTube:yt_api_key:https://console.cloud.google.com','Instagram:ig_token:https://developers.facebook.com','TikTok:tt_key:https://developers.tiktok.com','Spotify:sp_id:https://developer.spotify.com'].map(s=>{const[name,key,url]=s.split(':');const val=localStorage.getItem('ak_'+key)||'';return`<div class="api-row"><div style="font-size:11px;font-weight:500">${name}</div><div class="api-inp-row"><input type="password" placeholder="Paste ${name} API key..." value="${val}" onchange="localStorage.setItem('ak_${key}',this.value)" /><button onclick="window.open('https://${url}','_blank')">Get Key ↗</button></div></div>`;}).join('');
+}
+
+async function askAI(q){
+  const inp=document.getElementById('ins-inp');const question=q||inp.value.trim();
+  if(!question)return;inp.value='';
+  const btn=document.getElementById('ins-btn');btn.disabled=true;
+  document.getElementById('ins-panel').innerHTML='<div class="m-th">Analyzing your data...</div>';
+  const st=computeStats();const bp=byP();const pl=byPlat();const ht=htFreq();
+  const topTags=Object.entries(ht).sort((a,b)=>b[1].totalViews-a[1].totalViews).slice(0,10);
+  const topHooks=analyticsLog.filter(e=>e.hook).sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+  const recent=[...analyticsLog].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,10);
+  const ctx=`ANALYTICS: views=${fmt(st.views)}, eng=${fmt(st.eng)}, followers=${fmt(st.followers)}, posts=${st.count}, avgScore=${st.avgScore.toFixed(1)}
+BY PERSONA: ${Object.entries(bp).map(([p,d])=>`${p}: ${fmt(d.views)}views/${fmt(d.eng)}eng/${d.count}posts`).join(', ')}
+BY PLATFORM: ${Object.entries(pl).map(([p,d])=>`${p}: ${fmt(d.views)}views/${d.count}posts`).join(', ')}
+TOP HASHTAGS: ${topTags.map(([t,d])=>`${t}(${d.count}uses/${fmt(d.totalViews)}views)`).join(', ')}
+TOP HOOKS: ${topHooks.map(e=>`"${e.hook}"→${fmt(e.views||0)}views`).join(' | ')}
+RECENT: ${recent.map(e=>`"${e.title}"(${e.persona}/${e.platform}/${e.type},${fmt(e.views||0)}views,score:${e.score||'?'},tags:${e.hashtags||'none'})`).join(' | ')}`;
+  const sys=`You are a sharp, direct content intelligence analyst for PDMR — a multidisciplinary creative with 5 personas: PDMR (artist/designer/producer), FCKO (content studio), UCO (creative agency), P.H.A Love (secret music, clinical sound design), P.JUXT (personal layer). Analyze the data and give actionable, specific, honest insights. Be direct and conversational. Use concrete numbers. When recommending hashtags explain WHY based on performance. Format with bold key points. Max 220 words.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,system:sys,messages:[{role:'user',content:ctx+'\n\nQuestion: '+question}]})});
+    const data=await r.json();const text=data.content?.[0]?.text||'No response.';
+    const fmt2=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/#(\w+)/g,'<span class="itag">#$1</span>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+    document.getElementById('ins-panel').innerHTML=`<div class="ins-msg"><p>${fmt2}</p></div>`;
+    document.getElementById('reco-intel').innerHTML=`<div style="font-size:10px;color:var(--mu2);margin-bottom:5px;font-style:italic">Based on: "${question}"</div><div style="font-size:11px;line-height:1.7;">${fmt2}</div>`;
+  }catch(e){document.getElementById('ins-panel').innerHTML='<div class="m-th">Run from claude.ai for AI Intelligence to work.</div>';}
+  btn.disabled=false;
+}
+
+function runAutoInsight(){askAI('Give me a full performance overview — what\'s working, what\'s not, and what I should focus on next across all personas.');}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PERSONA PANELS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderPersona(p){
+  const el=document.getElementById('pi-'+p);if(!el)return;
+  const col=PCOL[p];const ps=seriesList.filter(s=>s.persona===p);const plts=platforms[p]||[];
+  const bp=byP();const pd=bp[p]||{views:0,eng:0,count:0};
+  const seriesHTML=ps.map(s=>{
+    const eps=episodes[s.id]||[];const live=eps.filter(e=>e.stage==='Live').length;const pct=eps.length?Math.round(live/eps.length*100):0;
+    return`<div class="sc" onclick="openSeriesDetail('${s.id}')" style="cursor:pointer" onmouseenter="this.style.borderColor='${col}'" onmouseleave="this.style.borderColor='var(--br)'">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div>
+      <div class="scid" style="color:${col}">${s.platforms||''} · ${s.status||''}</div>
+      <div class="scnm" style="color:${col}">${s.name}</div>
+      <div class="scdesc">${s.desc||'No description.'}</div>
+      <div class="sc-stats"><div><div class="sc-sn" style="color:${col}">${eps.length}</div><div class="sc-sl">Episodes</div></div><div style="margin-left:9px"><div class="sc-sn" style="color:var(--pdmr)">${live}</div><div class="sc-sl">Live</div></div></div>
+      <div class="sc-pb"><div class="sc-pf" style="width:${pct}%;background:${col}"></div></div>
+      <button class="sc-del" onclick="delSeries('${s.id}',event)">✕</button></div>`;
+  }).join('')+`<div class="sc sc-add" onclick="openSeriesMo(null,'${p}')"><span style="font-size:15px">+</span><span class="sc-add-lbl">New Series</span></div>`;
+  const pltHTML=plts.map(pl=>{
+    const sc={Active:'var(--pdmr)','Setting Up':'var(--uco)',Planned:'var(--mu2)','On Hold':'var(--mu)'};const pc=sc[pl.status]||'var(--mu)';
+    const pStats=analyticsLog.filter(e=>e.persona===p&&e.platform===pl.name);const tv=pStats.reduce((s,e)=>s+(parseFloat(e.views)||0),0);
+    return`<div class="plt-card"><div class="plt-icon">${pl.icon||'🌐'}</div><div class="plt-name">${pl.name}</div><div class="plt-handle">${pl.handle||''}</div><div class="plt-status" style="color:${pc};border-color:${pc}" onclick="cyclePlt('${p}','${pl.id}',this)">${pl.status}</div>${tv>0?`<div style="font-family:'Bebas Neue',sans-serif;font-size:14px;margin-top:5px;color:${col}">${fmt(tv)}</div><div style="font-family:'Space Mono',monospace;font-size:6px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">views logged</div>`:''}<button class="plt-del" onclick="delPlt('${p}','${pl.id}')">✕</button></div>`;
+  }).join('')+`<div class="plt-add" onclick="addPlt('${p}')"><span style="font-size:14px;color:var(--mu)">+</span><span style="font-family:'Space Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)">Add Platform</span></div>`;
+  el.innerHTML=`<div class="dh"><div class="dtag" style="color:${col}">${PNUMS[p]}</div><div class="dname" style="color:${col}">${PNAMES[p]}</div><div class="dsub">${PPARA[p]}</div></div>
+  ${pd.count>0?`<div class="g4" style="margin-bottom:12px;"><div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div><div class="h-lbl">Views</div><div class="h-num" style="color:${col}">${fmt(pd.views)}</div></div><div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div><div class="h-lbl">Engagements</div><div class="h-num">${fmt(pd.eng)}</div></div><div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div><div class="h-lbl">Posts Logged</div><div class="h-num">${pd.count}</div></div><div class="hero"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div><div class="h-lbl">Followers</div><div class="h-num">${fmt(pd.followers)}</div></div></div>`:''}
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--mu2);letter-spacing:.05em;margin-bottom:9px">Series</div>
+  <div class="sgrid">${seriesHTML}</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--mu2);letter-spacing:.05em;margin-bottom:9px;margin-top:4px">Platforms</div>
+  <div class="plt-grid" style="margin-bottom:14px">${pltHTML}</div>
+  <div class="g2"><div class="wg"><div class="wlbl">Notes</div><div contenteditable="true" style="font-size:11px;color:var(--mu2);line-height:1.7;min-height:45px;outline:none" onblur="sched()">Add notes, ideas, or links here...</div></div><div class="wg" id="extra-${p}"></div></div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PLATFORMS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function addPlt(persona){
+  const name=prompt('Platform name:');if(!name)return;
+  const handle=prompt('Handle / URL (optional):')||'';
+  const icon=prompt('Emoji icon (optional):')||'🌐';
+  if(!platforms[persona])platforms[persona]=[];
+  platforms[persona].push({id:'plt'+Date.now(),name,handle,icon,status:'Setting Up'});
+  renderPersona(persona);sched();
+}
+const PLT_SC={Active:'var(--pdmr)','Setting Up':'var(--uco)',Planned:'var(--mu2)','On Hold':'var(--mu)'};
+function cyclePlt(persona,id,el){
+  const plt=(platforms[persona]||[]).find(x=>x.id===id);if(!plt)return;
+  const i=PLT_STATUSES.indexOf(plt.status);plt.status=PLT_STATUSES[(i+1)%PLT_STATUSES.length];
+  const c=PLT_SC[plt.status]||'var(--mu)';el.textContent=plt.status;el.style.color=c;el.style.borderColor=c;sched();
+}
+function delPlt(persona,id){if(!platforms[persona])return;platforms[persona]=platforms[persona].filter(x=>x.id!==id);renderPersona(persona);sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SERIES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSeriesGrid(){
+  const g=document.getElementById('series-grid-main');if(!g)return;
+  g.innerHTML='';
+  seriesList.forEach(s=>{
+    const eps=episodes[s.id]||[];const live=eps.filter(e=>e.stage==='Live').length;const pct=eps.length?Math.round(live/eps.length*100):0;const col=PCOL[s.persona]||'var(--mu)';
+    const d=document.createElement('div');d.className='sc';
+    d.innerHTML=`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col}"></div><div class="scid" style="color:${col}">${s.persona.toUpperCase()} · ${s.platforms||''}</div><div class="scnm" style="color:${col}">${s.name}</div><div class="scdesc">${s.desc||'No description.'}</div><div class="sc-stats"><div><div class="sc-sn" style="color:${col}">${eps.length}</div><div class="sc-sl">Episodes</div></div><div style="margin-left:9px"><div class="sc-sn" style="color:var(--pdmr)">${live}</div><div class="sc-sl">Live</div></div></div><div class="sc-pb"><div class="sc-pf" style="width:${pct}%;background:${col}"></div></div><button class="sc-del" onclick="delSeries('${s.id}',event)">✕</button>`;
+    d.addEventListener('click',()=>openSeriesDetail(s.id));g.appendChild(d);
+  });
+  const add=document.createElement('div');add.className='sc sc-add';add.innerHTML='<span style="font-size:15px">+</span><span class="sc-add-lbl">New Series</span>';add.onclick=()=>openSeriesMo(null,null);g.appendChild(add);
+}
+
+function openSeriesMo(editId,defaultP){
+  const s=editId?seriesList.find(x=>x.id===editId):null;
+  document.getElementById('sf-name').value=s?s.name:'';
+  document.getElementById('sf-p').value=s?s.persona:(defaultP||'pdmr');
+  document.getElementById('sf-plats').value=s?(s.platforms||''):'';
+  document.getElementById('sf-fmt').value=s?(s.format||''):'';
+  document.getElementById('sf-status').value=s?(s.status||'In Dev'):'In Dev';
+  document.getElementById('sf-desc').value=s?(s.desc||''):'';
+  document.getElementById('sf-steps').value=s&&s.steps?s.steps.map(st=>st.name).join(', '):'Idea, Script, Record, Edit, Review, Publish, Live';
+  document.getElementById('sf-id').value=editId||'';
+  document.getElementById('mo-series-title').textContent=s?'Edit Series':'New Series';
+  document.getElementById('mo-series').classList.remove('hi');
+}
+
+function saveSeries(){
+  const name=document.getElementById('sf-name').value.trim();if(!name){document.getElementById('sf-name').focus();return;}
+  const editId=document.getElementById('sf-id').value;
+  const rawSteps=document.getElementById('sf-steps').value;
+  let steps;
+  if(editId){const existing=seriesList.find(x=>x.id===editId);steps=existing?existing.steps:buildSteps(rawSteps);const nn=rawSteps.split(',').map(s=>s.trim()).filter(Boolean);const en=(steps||[]).map(s=>s.name);nn.forEach(n=>{if(!en.includes(n))steps.push({name:n,substeps:[]});});}
+  else steps=buildSteps(rawSteps);
+  const entry={id:editId||('s'+Date.now()),name,persona:document.getElementById('sf-p').value,platforms:document.getElementById('sf-plats').value.trim(),format:document.getElementById('sf-fmt').value.trim(),status:document.getElementById('sf-status').value,desc:document.getElementById('sf-desc').value.trim(),steps};
+  if(editId){const i=seriesList.findIndex(x=>x.id===editId);if(i>-1)seriesList[i]=entry;}
+  else{seriesList.push(entry);if(!episodes[entry.id])episodes[entry.id]=[];}
+  document.getElementById('mo-series').classList.add('hi');
+  renderSeriesGrid();sched();
+}
+
+function buildSteps(raw){
+  const names=raw.split(',').map(s=>s.trim()).filter(Boolean);
+  return names.map(n=>{const def=DEFAULT_STEPS.find(d=>d.name.toLowerCase()===n.toLowerCase());return{name:n,substeps:def?[...def.substeps]:[]};});
+}
+
+function delSeries(id,e){e.stopPropagation();if(!confirm('Delete series and all episodes?'))return;seriesList=seriesList.filter(x=>x.id!==id);delete episodes[id];renderSeriesGrid();sched();}
+
+function openSeriesDetail(sid){
+  goTab('series',null);currentSeries=sid;
+  document.getElementById('series-list-view').style.display='none';
+  document.getElementById('series-detail-view').style.display='block';
+  renderSeriesDetail(sid);
+}
+
+function renderSeriesDetail(sid){
+  const s=seriesList.find(x=>x.id===sid);if(!s)return;
+  const dv=document.getElementById('series-detail-view');
+  const col=PCOL[s.persona]||'var(--mu)';const eps=episodes[sid]||[];
+  const live=eps.filter(e=>e.stage==='Live').length;
+  const boardCols=(s.steps||DEFAULT_STEPS).map(st=>{
+    const stEps=eps.filter(e=>e.stage===st.name);
+    const sc=getStageClass(st.name);
+    const stageColors={'Idea':'var(--mu)','Script':'var(--pj)','Record':'var(--fcko)','Edit':'var(--uco)','Review':'var(--pha)','Publish':'#aaa','Live':'var(--pdmr)'};
+    const stCol=stageColors[st.name]||'var(--mu)';
+    const cards=stEps.map(ep=>`<div class="ep-card" onclick="openEpMo(null,'${ep.id}','${sid}')">
+      <div class="ep-num">EP ${String(ep.num||'?').padStart(2,'0')} · ${ep.platforms||''}</div>
+      <div class="ep-etitle">${ep.title}</div>
+      <div class="ep-emeta">
+        <span class="stage-badge ${sc}" style="color:${stCol};border-color:${stCol}">${ep.stage}</span>
+        ${ep.publish?`<span class="ep-etag">🚀 ${ep.publish}</span>`:ep.record?`<span class="ep-etag">📅 ${ep.record}</span>`:''}
+      </div>
+      <button class="ep-del" onclick="delEp('${ep.id}','${sid}',event)">✕</button>
+    </div>`).join('');
+    return`<div class="ep-col"><div class="ep-ch"><div class="ep-ct">${st.name}</div><div class="ep-cc">${stEps.length}</div></div><div class="ep-cb">${cards}</div><button class="ep-add" onclick="openEpMo('${st.name}',null,'${sid}')">+ Add</button></div>`;
+  }).join('');
+  const stepsEdRows=(s.steps||DEFAULT_STEPS).map((st,si)=>`<div class="step-row" data-si="${si}"><div class="step-drag">⠿</div><input class="step-name" value="${st.name}" onblur="updStep('${sid}',${si},this.value)" /><button class="step-tog" onclick="togSS('${sid}',${si})">sub-steps ▾</button><button class="step-del2" onclick="delStep('${sid}',${si})">✕</button></div><div class="substeps" id="ss-${sid}-${si}">${st.substeps.map((ss,ssi)=>`<div class="ssr"><span style="color:var(--mu);font-size:9px">└</span><input class="ssn" value="${ss}" onblur="updSS('${sid}',${si},${ssi},this.value)" /><button class="ssd" onclick="delSS('${sid}',${si},${ssi})">✕</button></div>`).join('')}<button class="add-ss" onclick="addSS('${sid}',${si})">+ sub-step</button></div>`).join('');
+  dv.innerHTML=`<button class="bk" onclick="closeSeriesDetail()">← All Series</button>
+  <div class="dh"><div class="dtag" style="color:${col}">${s.persona.toUpperCase()} · ${s.platforms||''} · ${s.format||''}</div><div class="dname" style="color:${col}">${s.name}</div>
+  <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px"><span class="tag" style="color:${col};border-color:${col}">${s.status||'In Dev'}</span><button class="bsm" onclick="openSeriesMo('${sid}',null)">✎ Edit</button><button class="bsm ac" onclick="openEpMo(null,null,'${sid}')" style="margin-left:auto">+ New Episode</button></div>
+  <div class="sd-desc" contenteditable="true" onblur="updSeriesDesc('${sid}',this.textContent)">${s.desc||'Add description...'}</div></div>
+  <div class="sd-stats"><div class="sd-sb"><div class="sd-sn">${eps.length}</div><div class="sd-sl">Total</div></div><div class="sd-sb"><div class="sd-sn" style="color:var(--pdmr)">${live}</div><div class="sd-sl">Live</div></div><div class="sd-sb"><div class="sd-sn" style="color:var(--fcko)">${eps.filter(e=>e.stage!=='Live'&&e.stage!=='Idea').length}</div><div class="sd-sl">In Prod</div></div><div class="sd-sb"><div class="sd-sn" style="color:var(--mu2)">${eps.filter(e=>e.stage==='Idea').length}</div><div class="sd-sl">Ideas</div></div></div>
+  <div class="g2"><div><div class="sh" style="margin-bottom:8px">Episode Pipeline</div><div class="ep-board">${boardCols}</div></div>
+  <div><div class="sh" style="margin-bottom:8px">Production Steps <button class="bsm" onclick="addStep('${sid}')" style="font-size:7px;margin-left:6px">+ Step</button></div><div class="steps-ed" id="steps-ed-${sid}">${stepsEdRows}</div></div></div>`;
+}
+
+function closeSeriesDetail(){currentSeries=null;document.getElementById('series-list-view').style.display='block';document.getElementById('series-detail-view').style.display='none';document.getElementById('series-detail-view').innerHTML='';}
+function updSeriesDesc(sid,v){const s=seriesList.find(x=>x.id===sid);if(s){s.desc=v.trim();sched();}}
+function togSS(sid,si){const el=document.getElementById(`ss-${sid}-${si}`);if(el){el.style.display=el.style.display==='flex'?'none':'flex';el.style.flexDirection='column';}}
+function updStep(sid,si,v){const s=seriesList.find(x=>x.id===sid);if(s&&s.steps[si]){s.steps[si].name=v.trim();sched();}}
+function delStep(sid,si){const s=seriesList.find(x=>x.id===sid);if(s&&s.steps){s.steps.splice(si,1);renderSeriesDetail(sid);sched();}}
+function addStep(sid){const s=seriesList.find(x=>x.id===sid);if(s){if(!s.steps)s.steps=[];s.steps.push({name:'New Step',substeps:[]});renderSeriesDetail(sid);sched();}}
+function updSS(sid,si,ssi,v){const s=seriesList.find(x=>x.id===sid);if(s&&s.steps[si]){s.steps[si].substeps[ssi]=v.trim();sched();}}
+function delSS(sid,si,ssi){const s=seriesList.find(x=>x.id===sid);if(s&&s.steps[si]){s.steps[si].substeps.splice(ssi,1);renderSeriesDetail(sid);sched();}}
+function addSS(sid,si){const s=seriesList.find(x=>x.id===sid);if(s&&s.steps[si]){s.steps[si].substeps.push('New sub-step');renderSeriesDetail(sid);sched();}}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  EPISODES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openEpMo(defaultStage,editId,sid){
+  const s=seriesList.find(x=>x.id===sid);const eps=episodes[sid]||[];const ep=editId?eps.find(x=>x.id===editId):null;
+  const nextNum=eps.length?Math.max(...eps.map(e=>parseInt(e.num)||0))+1:1;
+  const stg=document.getElementById('ef-stage');stg.innerHTML='';
+  const stages=s&&s.steps?s.steps.map(st=>st.name):DEFAULT_STEPS.map(st=>st.name);
+  stages.forEach(st=>{const o=document.createElement('option');o.value=st;o.textContent=st;stg.appendChild(o);});
+  document.getElementById('ef-num').value=ep?(ep.num||''):nextNum;
+  document.getElementById('ef-title').value=ep?ep.title:'';
+  stg.value=ep?ep.stage:(defaultStage||stages[0]);
+  document.getElementById('ef-plats').value=ep?(ep.platforms||''):'';
+  document.getElementById('ef-rec').value=ep?(ep.record||''):'';
+  document.getElementById('ef-pub').value=ep?(ep.publish||''):'';
+  document.getElementById('ef-thumb').value=ep?(ep.thumb||''):'';
+  document.getElementById('ef-links').value=ep?(ep.links||''):'';
+  document.getElementById('ef-notes').value=ep?(ep.notes||''):'';
+  document.getElementById('ef-id').value=editId||'';
+  document.getElementById('ef-sid').value=sid;
+  document.getElementById('mo-ep-title').textContent=ep?'Edit Episode':'New Episode';
+  pt(ep?(ep.thumb||''):'','ef-tp');
+  document.getElementById('mo-ep').classList.remove('hi');
+}
+function saveEp(){
+  const title=document.getElementById('ef-title').value.trim();if(!title){document.getElementById('ef-title').focus();return;}
+  const sid=document.getElementById('ef-sid').value;if(!episodes[sid])episodes[sid]=[];
+  const editId=document.getElementById('ef-id').value;
+  const entry={id:editId||('e'+Date.now()),num:parseInt(document.getElementById('ef-num').value)||episodes[sid].length+1,title,stage:document.getElementById('ef-stage').value,platforms:document.getElementById('ef-plats').value.trim(),record:document.getElementById('ef-rec').value,publish:document.getElementById('ef-pub').value,thumb:document.getElementById('ef-thumb').value.trim(),links:document.getElementById('ef-links').value.trim(),notes:document.getElementById('ef-notes').value.trim()};
+  if(editId){const i=episodes[sid].findIndex(x=>x.id===editId);if(i>-1)episodes[sid][i]=entry;}
+  else episodes[sid].push(entry);
+  episodes[sid].sort((a,b)=>(a.num||0)-(b.num||0));
+  document.getElementById('mo-ep').classList.add('hi');
+  if(currentSeries===sid)renderSeriesDetail(sid);
+  renderSeriesGrid();sched();
+}
+function delEp(eid,sid,e){e.stopPropagation();if(!episodes[sid])return;episodes[sid]=episodes[sid].filter(x=>x.id!==eid);if(currentSeries===sid)renderSeriesDetail(sid);renderSeriesGrid();sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONTENT PIPELINE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+let vpF='all';
+function renderVids(){
+  VSTAGES.forEach(st=>{
+    const col=document.getElementById('vcol-'+st);const cnt=document.getElementById('vc-'+st);if(!col)return;
+    const f=videos.filter(v=>v.stage===st&&(vpF==='all'||v.persona===vpF||(v.platforms||'').includes(vpF)));
+    col.innerHTML='';f.forEach(v=>{const c2=PCOL[v.persona]||'#888';const d=document.createElement('div');d.className='ep-card';
+      d.innerHTML=`${v.thumb?`<img src="${v.thumb}" style="width:100%;height:46px;object-fit:cover;border-radius:2px;margin-bottom:4px;border:1px solid var(--br)" onerror="this.style.display='none'">`:''}
+      <div class="ep-etitle">${v.title}</div><div class="ep-emeta"><span class="ep-etag" style="color:${c2};border-color:${c2}">${v.persona.toUpperCase()}</span>${v.platforms?`<span class="ep-etag">${v.platforms}</span>`:''}${v.publish?`<span class="ep-etag">🚀 ${v.publish}</span>`:''}</div>
+      <button class="ep-del" onclick="delVid('${v.id}',event)">✕</button>`;
+      d.addEventListener('click',()=>openVidMo(null,v.id));col.appendChild(d);});
+    if(cnt)cnt.textContent=videos.filter(v=>v.stage===st).length;
+  });
+}
+function filterVids(f,btn){vpF=f;document.querySelectorAll('#vp-filters .bsm').forEach(b=>b.classList.remove('ac'));btn.classList.add('ac');renderVids();}
+function openVidMo(ds,editId){
+  const v=editId?videos.find(x=>x.id===editId):null;
+  document.getElementById('vf-title').value=v?v.title:'';document.getElementById('vf-p').value=v?v.persona:'pdmr';
+  document.getElementById('vf-plats').value=v?(v.platforms||''):'';document.getElementById('vf-stage').value=v?v.stage:(ds||'Idea');
+  document.getElementById('vf-series').value=v?(v.series||''):'';document.getElementById('vf-shoot').value=v?(v.shoot||''):'';
+  document.getElementById('vf-pub').value=v?(v.publish||''):'';document.getElementById('vf-thumb').value=v?(v.thumb||''):'';
+  document.getElementById('vf-links').value=v?(v.links||''):'';document.getElementById('vf-notes').value=v?(v.notes||''):'';
+  document.getElementById('vf-id').value=editId||'';document.getElementById('mo-vid-title').textContent=v?'Edit Content':'New Content';
+  pt(v?(v.thumb||''):'','vf-tp');document.getElementById('mo-vid').classList.remove('hi');
+}
+function saveVid(){
+  const title=document.getElementById('vf-title').value.trim();if(!title){document.getElementById('vf-title').focus();return;}
+  const editId=document.getElementById('vf-id').value;
+  const entry={id:editId||('v'+Date.now()),title,persona:document.getElementById('vf-p').value,platforms:document.getElementById('vf-plats').value.trim(),stage:document.getElementById('vf-stage').value,series:document.getElementById('vf-series').value.trim(),shoot:document.getElementById('vf-shoot').value,publish:document.getElementById('vf-pub').value,thumb:document.getElementById('vf-thumb').value.trim(),links:document.getElementById('vf-links').value.trim(),notes:document.getElementById('vf-notes').value.trim()};
+  if(editId){const i=videos.findIndex(v=>v.id===editId);if(i>-1)videos[i]=entry;}else videos.push(entry);
+  document.getElementById('mo-vid').classList.add('hi');renderVids();sched();
+}
+function delVid(id,e){e.stopPropagation();videos=videos.filter(v=>v.id!==id);renderVids();sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANALYTICS LOG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openLogMo(){
+  ['lf-title','lf-series','lf-views','lf-likes','lf-comments','lf-shares','lf-wt','lf-fol','lf-score','lf-htags','lf-hook','lf-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('lf-p').value='pdmr';document.getElementById('lf-plat').value='YouTube';document.getElementById('lf-type').value='Video';
+  document.getElementById('lf-date').value=new Date().toISOString().split('T')[0];document.getElementById('lf-id').value='';
+  document.getElementById('mo-log').classList.remove('hi');
+}
+function saveLog(){
+  const title=document.getElementById('lf-title').value.trim();if(!title){document.getElementById('lf-title').focus();return;}
+  const editId=document.getElementById('lf-id').value;
+  const entry={id:editId||('a'+Date.now()),title,persona:document.getElementById('lf-p').value,platform:document.getElementById('lf-plat').value,type:document.getElementById('lf-type').value,series:document.getElementById('lf-series').value.trim(),date:document.getElementById('lf-date').value,views:parseFloat(document.getElementById('lf-views').value)||0,likes:parseFloat(document.getElementById('lf-likes').value)||0,comments:parseFloat(document.getElementById('lf-comments').value)||0,shares:parseFloat(document.getElementById('lf-shares').value)||0,watchTime:parseFloat(document.getElementById('lf-wt').value)||0,followers:parseFloat(document.getElementById('lf-fol').value)||0,score:parseFloat(document.getElementById('lf-score').value)||0,hashtags:document.getElementById('lf-htags').value.trim(),hook:document.getElementById('lf-hook').value.trim(),notes:document.getElementById('lf-notes').value.trim()};
+  if(editId){const i=analyticsLog.findIndex(x=>x.id===editId);if(i>-1)analyticsLog[i]=entry;}else analyticsLog.push(entry);
+  document.getElementById('mo-log').classList.add('hi');renderCommand();sched();
+}
+function delLog(id){analyticsLog=analyticsLog.filter(x=>x.id!==id);renderAnalytics();sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TASKS / REMINDERS / TOM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function togTask(ck){ck.classList.toggle('dn');const tx=ck.nextElementSibling;tx.classList.toggle('dn',ck.classList.contains('dn'));ck.textContent=ck.classList.contains('dn')?'✓':'';updDone();sched();}
+function delTask(btn){btn.closest('.trow').remove();sched();}
+function updDone(){const d=document.querySelectorAll('.tck.dn').length;const el=document.getElementById('cmd-done');if(el)el.textContent=d;}
+function addTask(){const t=document.getElementById('tk-txt').value.trim();if(!t)return;const p=document.getElementById('tk-per').value;const due=document.getElementById('tk-due').value;const c=PCOL[p];const dueStr=due?new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';const d=document.createElement('div');d.className='trow';d.innerHTML=`<div class="tck" onclick="togTask(this)"></div><div class="ttx">${t}</div><span class="tptag" style="color:${c};border-color:${c}">${p.toUpperCase()}</span><div class="tdue">${dueStr}</div><button class="tdel" onclick="delTask(this)">✕</button>`;document.getElementById('task-list').appendChild(d);document.getElementById('tk-txt').value='';document.getElementById('tk-due').value='';sched();}
+function addRem(){const t=document.getElementById('rm-txt').value.trim();if(!t)return;const p=document.getElementById('rm-per').value;const ti=document.getElementById('rm-time').value.trim()||'No schedule';const c=PCOL[p]||'var(--mu2)';const d=document.createElement('div');d.className='rrow';d.innerHTML=`<div class="rdot" style="background:${c}"></div><div><div class="rtx">${t}</div><div class="rtm">${ti}</div></div><button class="rdel" onclick="delRem(this)">✕</button>`;document.getElementById('rem-list').appendChild(d);document.getElementById('rm-txt').value='';document.getElementById('rm-time').value='';sched();}
+function delRem(btn){btn.closest('.rrow').remove();sched();}
+function addTOM(){const t=prompt('New top-of-mind item:');if(!t)return;const list=document.getElementById('tom-list');const n=list.querySelectorAll('.tom').length+1;const d=document.createElement('div');d.className='tom';d.innerHTML=`<div class="tomn">${String(n).padStart(2,'0')}</div><div>${t}</div><button class="tomd" onclick="delTOM(this)">✕</button>`;list.appendChild(d);sched();}
+function delTOM(btn){btn.closest('.tom').remove();document.querySelectorAll('#tom-list .tomn').forEach((el,i)=>{el.textContent=String(i+1).padStart(2,'0');});sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  BADGE CYCLE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function cycleBadge(el,e){e.stopPropagation();const sp=el.querySelector('span:last-child'),dot=el.querySelector('.dot');const idx=STATUSES.indexOf(sp.textContent);const next=STATUSES[(idx+1)%STATUSES.length];sp.textContent=next;const c=SCOL[next]||'var(--mu)';dot.style.background=c;el.style.color=c;dot.classList.toggle('pulse',next==='Active');sched();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  MODALS / UTILS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function cmo(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.add('hi');}
+function tog(id){document.getElementById(id).classList.toggle('hi2');}
+function pt(url,imgId){const img=document.getElementById(imgId);if(!img)return;if(url&&url.startsWith('http')){img.src=url;img.classList.add('sh2');}else img.classList.remove('sh2');}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CHARTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CD={plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',titleColor:'#e2e2da',bodyColor:'#686868',borderColor:'#2a2a2a',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#484848',font:{family:'Space Mono',size:7}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#484848',font:{family:'Space Mono',size:7}}}}};
+function dch(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function mkBar(id,labels,data,colors){const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:Array.isArray(colors)?colors:data.map((_,i)=>colors),borderRadius:2,borderSkipped:false}]},options:{...CD,maintainAspectRatio:false,plugins:{...CD.plugins}}});}
+function mkDonut(id,labels,data,colors){const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;const dc=['#c8f542','#ff6b35','#9b7fd4','#00d4aa','#f0c040','#ff4444','#888'];charts[id]=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors||dc.slice(0,data.length),borderColor:'#090909',borderWidth:2}]},options:{maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#686868',font:{family:'Space Mono',size:7},boxWidth:7,padding:7}},tooltip:{backgroundColor:'#111',titleColor:'#e2e2da',bodyColor:'#686868',borderColor:'#2a2a2a',borderWidth:1}},cutout:'63%'}});}
+function mkLine(id,labels,datasets){const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;charts[id]=new Chart(ctx,{type:'line',data:{labels,datasets:datasets.map(d=>({label:d.label,data:d.data,borderColor:d.color||'#c8f542',backgroundColor:(d.color||'#c8f542')+'18',tension:.4,pointRadius:3,pointBackgroundColor:d.color||'#c8f542',fill:true}))},options:{...CD,maintainAspectRatio:false,plugins:{...CD.plugins,legend:{display:false}}}});}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AI SIDEBAR
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleSB(){sbOpen=!sbOpen;document.getElementById('sidebar').classList.toggle('closed',!sbOpen);document.getElementById('sb-tog').classList.toggle('on',sbOpen);}
+function qp(t){document.getElementById('sb-inp').value=t;sendSB();}
+function sbKd(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendSB();}}
+function addSBMsg(txt,type){const msgs=document.getElementById('sb-msgs');const d=document.createElement('div');d.className='m-'+type;d.innerHTML=txt;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;}
+async function sendSB(){
+  const inp=document.getElementById('sb-inp');const prompt=inp.value.trim();if(!prompt)return;
+  inp.value='';const btn=document.getElementById('sb-btn');btn.disabled=true;
+  addSBMsg(prompt,'user');const th=addSBMsg('thinking...','th');
+  const sys=`You are an AI dashboard builder for PDMR HQ. Panels: command, analytics, intelligence, tasks, reminders, series, content, pdmr, fcko, uco, pha, pj, arch. Extra widgets go in #extra-{panel} or #extra-{persona} divs. CSS vars: --pdmr:#c8f542, --fcko:#ff6b35, --uco:#9b7fd4, --pha:#00d4aa, --pj:#f0c040, --bg:#090909, --sf:#0f0f0f, --s2:#151515, --br:#1e1e1e, --tx:#e2e2da, --mu:#484848, --mu2:#686868. Classes: .wg (card), .wlbl (label), .g2/.g3/.g4 (grids). Respond with brief confirmation then: {"action":"inject","target":"extra-overview","html":"..."} or {"action":"js","code":"..."}. Short responses only.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:sys,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();const raw=data.content?.[0]?.text||'Something went wrong.';
+    th.remove();const jm=raw.match(/\{[\s\S]*?"action"[\s\S]*?\}/);let disp=raw;
+    if(jm){try{const act=JSON.parse(jm[0]);disp=raw.replace(jm[0],'').replace(/```json|```/g,'').trim();if(act.action==='inject'&&act.target&&act.html){const tgt=document.getElementById(act.target);if(tgt){const w=document.createElement('div');w.innerHTML=act.html;tgt.appendChild(w);sched();}}else if(act.action==='js'&&act.code){try{eval(act.code);sched();}catch(e){}}}catch(e){}}
+    addSBMsg(disp||'Done ✓','ai');
+  }catch(e){th.remove();addSBMsg('Run from claude.ai for AI Builder to work.','ai');}
+  btn.disabled=false;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ROADMAP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const SERIES_COLORS={
+  'Schizophonia':'var(--pdmr)','PDMR Talks You':'var(--fcko)',
+  'One Day as...':'var(--uco)','Under the Influence':'var(--pha)',
+  'PDMR Show':'var(--pj)','Jeremiah':'#ff8c69',
+  'Folie À Deux':'var(--pdmr)','Crude Dump':'var(--fcko)',
+  'Openly':'var(--uco)','Iconographia':'var(--pha)',
+  'Posters':'var(--pj)','Materialistic':'#c084fc',
+  'Collaborations':'#fb923c','Cash/Business':'#34d399'
+};
+
+function seedRoadmap(){
+  // Pre-seed from the SVG roadmap data
+  const MULTIMEDIA={
+    1:{series:['Schizophonia','PDMR Talks You','One Day as...'],goals:['Launch Schizophonia podcast','Start PDMR Talks You','Begin One Day as... series','Establish content rhythm'],calendar:{JAN:['Schizophonia','PDMR Talks You'],FEB:['Schizophonia','One Day as...'],MAR:['PDMR Talks You','One Day as...'],APR:['Schizophonia'],MAY:['PDMR Talks You'],JUN:['Schizophonia','One Day as...'],JUL:['PDMR Talks You'],AUG:['Schizophonia','One Day as...'],SEP:['PDMR Talks You'],OCT:['Schizophonia'],NOV:['One Day as...'],DEC:['PDMR Talks You','Schizophonia']}},
+    2:{series:['Schizophonia','PDMR Talks You','One Day as...','Jeremiah'],goals:['Scale Schizophonia to consistent weekly release','Feature Jeremiah as first major guest','Grow PDMR Talks You audience','Build cross-series audience'],calendar:{JAN:['Schizophonia','PDMR Talks You'],FEB:['One Day as...'],MAR:['Schizophonia'],APR:['PDMR Talks You','One Day as...'],MAY:['Schizophonia'],JUN:['PDMR Talks You'],JUL:['Jeremiah','Schizophonia'],AUG:['One Day as...'],SEP:['Schizophonia','PDMR Talks You'],OCT:['One Day as...'],NOV:['Schizophonia'],DEC:['PDMR Talks You']}},
+    3:{series:['Schizophonia'],goals:['Year of Schizophonia — make it the dominant series','Perfect the format','Build loyal listener base','Hit episode milestone'],calendar:{JAN:['Schizophonia'],FEB:['Schizophonia'],MAR:['Schizophonia'],APR:['Schizophonia'],MAY:['Schizophonia'],JUN:['Schizophonia'],JUL:['Schizophonia'],AUG:['Schizophonia'],SEP:['Schizophonia'],OCT:['Schizophonia'],NOV:['Schizophonia'],DEC:['Schizophonia']}},
+    4:{series:['Schizophonia','One Day as...'],goals:['Reintroduce One Day as... with evolved format','Maintain Schizophonia momentum','Explore quarterly content planning'],calendar:{JAN:['Schizophonia','One Day as...'],FEB:['Schizophonia'],MAR:['One Day as...'],APR:['Schizophonia'],MAY:['One Day as...'],JUN:['Schizophonia'],JUL:['One Day as...'],AUG:['Schizophonia'],SEP:['One Day as...'],OCT:['Schizophonia'],NOV:['One Day as...'],DEC:['Schizophonia']}},
+    5:{series:['Under the Influence','Schizophonia','One Day as...','PDMR Talks You'],goals:['Launch Under the Influence as flagship documentary series','Return PDMR Talks You at scale','Run all 4 series simultaneously','Multi-platform distribution strategy'],calendar:{JAN:['Under the Influence','Schizophonia','One Day as...'],FEB:['Under the Influence','PDMR Talks You'],MAR:['Schizophonia','One Day as...'],APR:['Under the Influence','PDMR Talks You'],MAY:['Schizophonia','One Day as...'],JUN:['Under the Influence','PDMR Talks You'],JUL:['Schizophonia','One Day as...'],AUG:['Under the Influence'],SEP:['PDMR Talks You','Schizophonia'],OCT:['Under the Influence','One Day as...'],NOV:['PDMR Talks You'],DEC:['Under the Influence','Schizophonia']}},
+    6:{series:['Under the Influence','Schizophonia','One Day as...','PDMR Talks You','PDMR Show'],goals:['Launch PDMR Show — the flagship show format','All 5 series running','Full monetization active','Establish PDMR as a media brand'],calendar:{JAN:['Under the Influence','Schizophonia','One Day as...'],FEB:['PDMR Talks You','PDMR Show'],MAR:['Under the Influence','Schizophonia'],APR:['PDMR Show','PDMR Talks You'],MAY:['Under the Influence','One Day as...'],JUN:['Schizophonia','PDMR Show'],JUL:['Under the Influence','PDMR Talks You'],AUG:['PDMR Show','One Day as...'],SEP:['Schizophonia','Under the Influence'],OCT:['PDMR Show','PDMR Talks You'],NOV:['Under the Influence','One Day as...'],DEC:['PDMR Show','Schizophonia']}}
+  };
+  const FCKO={
+    1:{series:['Folie À Deux','Crude Dump','Openly','Iconographia'],goals:['Ship Folie À Deux first collab','Get Crude Dump consistent','Open format experiments','Build Iconographia catalog'],calendar:{JAN:['Folie À Deux'],FEB:['Crude Dump'],MAR:['Openly'],APR:['Crude Dump','Folie À Deux'],MAY:['Iconographia'],JUN:['Openly','Crude Dump'],JUL:['Folie À Deux'],AUG:['Iconographia'],SEP:['Crude Dump'],OCT:['Openly'],NOV:['Iconographia'],DEC:['Folie À Deux','Crude Dump']}},
+    2:{series:['Posters','Crude Dump','Openly','Folie À Deux','Iconographia'],goals:['Launch Posters series','Scale Iconographia','Keep Crude Dump raw','Folie collab expansion'],calendar:{JAN:['Posters'],FEB:['Crude Dump','Iconographia'],MAR:['Openly'],APR:['Folie À Deux','Posters'],MAY:['Iconographia'],JUN:['Crude Dump','Openly'],JUL:['Posters'],AUG:['Folie À Deux'],SEP:['Iconographia','Crude Dump'],OCT:['Posters'],NOV:['Openly'],DEC:['Folie À Deux','Iconographia']}},
+    3:{series:['Collaborations','Iconographia','Openly','Posters','Materialistic'],goals:['Launch Materialistic series','Deep collab push','Posters at scale','Iconographia milestone collection'],calendar:{JAN:['Collaborations','Iconographia'],FEB:['Openly'],MAR:['Materialistic','Posters'],APR:['Collaborations'],MAY:['Iconographia'],JUN:['Materialistic','Openly'],JUL:['Collaborations','Posters'],AUG:['Iconographia'],SEP:['Materialistic'],OCT:['Collaborations'],NOV:['Posters','Iconographia'],DEC:['Materialistic','Openly']}},
+    4:{series:['Openly','Collaborations','Materialistic','Iconographia','Posters'],goals:['Solidify Materialistic as signature series','Collaboration network expansion','Posters + Iconographia catalog','Open format evolution'],calendar:{JAN:['Openly','Iconographia'],FEB:['Materialistic'],MAR:['Collaborations','Posters'],APR:['Openly'],MAY:['Materialistic','Iconographia'],JUN:['Collaborations'],JUL:['Posters','Openly'],AUG:['Materialistic'],SEP:['Iconographia','Collaborations'],OCT:['Posters'],NOV:['Materialistic','Openly'],DEC:['Collaborations','Iconographia']}},
+    5:{series:['Cash/Business','Collaborations','Iconographia','Posters','Openly','Materialistic'],goals:['Monetization activates — Cash & Business content','Revenue from catalog','Licensing deals','Collaboration economy'],calendar:{JAN:['Cash/Business','Collaborations'],FEB:['Iconographia','Openly'],MAR:['Cash/Business','Materialistic'],APR:['Collaborations','Posters'],MAY:['Cash/Business','Iconographia'],JUN:['Openly','Materialistic'],JUL:['Cash/Business','Collaborations'],AUG:['Posters','Iconographia'],SEP:['Cash/Business'],OCT:['Materialistic','Openly'],NOV:['Collaborations','Cash/Business'],DEC:['Iconographia','Posters']}},
+    6:{series:['Cash/Business','Collaborations','Iconographia','Posters','Materialistic','Openly'],goals:['Full business machine operational','All series monetized','Brand licensing active','Legacy catalog established'],calendar:{JAN:['Cash/Business','Iconographia'],FEB:['Collaborations','Openly'],MAR:['Materialistic','Cash/Business'],APR:['Posters','Collaborations'],MAY:['Cash/Business','Iconographia'],JUN:['Materialistic','Openly'],JUL:['Cash/Business','Collaborations'],AUG:['Posters'],SEP:['Materialistic','Iconographia'],OCT:['Cash/Business','Openly'],NOV:['Collaborations'],DEC:['Cash/Business','Materialistic']}}
+  };
+  // Build roadmapData keyed by "Y{n}-multimedia" and "Y{n}-fcko"
+  for(let y=1;y<=6;y++){
+    roadmapData['Y'+y+'-multimedia']={
+      year:y, type:'multimedia', label:'Multimedia Roadmap',
+      series:MULTIMEDIA[y].series,
+      goals:MULTIMEDIA[y].goals.map((g,i)=>({id:'mg'+y+i,text:g,done:false})),
+      calendar:MULTIMEDIA[y].calendar,
+      weeklyNotes:{}
+    };
+    roadmapData['Y'+y+'-fcko']={
+      year:y, type:'fcko', label:'FCKO / Dev Roadmap',
+      series:FCKO[y].series,
+      goals:FCKO[y].goals.map((g,i)=>({id:'fg'+y+i,text:g,done:false})),
+      calendar:FCKO[y].calendar,
+      weeklyNotes:{}
+    };
+  }
+}
+
+function renderRoadmap(){
+  const switcher=document.getElementById('rm-year-switcher');
+  const content=document.getElementById('rm-year-content');
+  if(!switcher||!content) return;
+  if(Object.keys(roadmapData).length===0) seedRoadmap();
+  const years=[...new Set(Object.values(roadmapData).map(d=>d.year))].sort();
+  if(!activeRmYear) activeRmYear=years[0]||1;
+
+  // Year + type switcher
+  const types=[...new Set(Object.values(roadmapData).map(d=>d.type))];
+  let switchHTML='';
+  years.forEach(y=>{
+    types.forEach(t=>{
+      const key='Y'+y+'-'+t;
+      const rd=roadmapData[key];if(!rd)return;
+      const lbl=t==='multimedia'?`Y${y} Multimedia`:`Y${y} FCKO`;
+      switchHTML+=`<button class="rm-yr-btn${activeRmYear===key?' on':''}" onclick="setRmYear('${key}')">${lbl}</button>`;
+    });
+  });
+  switchHTML+=`<button class="rm-yr-btn" onclick="addRoadmapYear()" style="border-style:dashed">+ Year</button>`;
+  switcher.innerHTML=switchHTML;
+
+  const rd=roadmapData[activeRmYear];
+  if(!rd){content.innerHTML='<div style="font-size:11px;color:var(--mu2);padding:20px 0">Select a year above or add a new one.</div>';return;}
+
+  const doneGoals=rd.goals.filter(g=>g.done).length;
+  const totalGoals=rd.goals.length;
+  const goalPct=totalGoals?Math.round(doneGoals/totalGoals*100):0;
+
+  // Summary bar
+  let summaryHTML=`<div class="rm-summary">
+    <div class="rm-sb"><div class="rm-sn" style="color:var(--pdmr)">${rd.series.length}</div><div class="rm-sl">Series</div></div>
+    <div class="rm-sb"><div class="rm-sn">${totalGoals}</div><div class="rm-sl">Goals</div></div>
+    <div class="rm-sb"><div class="rm-sn" style="color:var(--pdmr)">${doneGoals}</div><div class="rm-sl">Done</div></div>
+    <div class="rm-sb" style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1;height:4px;background:var(--br2);border-radius:2px;overflow:hidden"><div style="width:${goalPct}%;height:100%;background:var(--pdmr);border-radius:2px;transition:width .5s"></div></div><div class="rm-sl" style="white-space:nowrap">${goalPct}% goals done</div></div></div>
+  </div>`;
+
+  // Monthly calendar
+  let calHTML='<div class="wlbl" style="margin-bottom:8px">Monthly Content Plan</div><div class="rm-cal">';
+  MONTHS.forEach(m=>{
+    const chips=(rd.calendar[m]||[]);
+    calHTML+=`<div class="rm-month">
+      <div class="rm-month-head">${m}</div>
+      ${chips.map(s=>{const col=SERIES_COLORS[s]||'var(--mu2)';return`<div class="rm-series-chip" style="color:${col};border-color:${col}30;background:${col}10" title="${s}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px">${s}</span><button onclick="removeChipFromMonth('${activeRmYear}','${m}','${s}',event)">✕</button></div>`;}).join('')}
+      <button class="rm-add-chip" onclick="addSeriesChip('${activeRmYear}','${m}')">+ series</button>
+    </div>`;
+  });
+  calHTML+='</div>';
+
+  // Weekly view (52 weeks grid)
+  let weekHTML='<div class="wlbl" style="margin-bottom:8px">52-Week View</div><div class="rm-week-grid">';
+  const seriesInYear=rd.series;
+  for(let w=1;w<=52;w++){
+    const monthIdx=Math.floor((w-1)/4.33);const month=MONTHS[Math.min(monthIdx,11)];
+    const chips=rd.calendar[month]||[];
+    const dots=seriesInYear.slice(0,3).map(s=>{const col=SERIES_COLORS[s]||'var(--mu)';const active=chips.includes(s);return`<div class="rm-week-dot" style="background:${active?col:'var(--br2)'}"></div>`;}).join('');
+    const note=rd.weeklyNotes['W'+w]||'';
+    weekHTML+=`<div class="rm-week" onclick="editWeekNote('${activeRmYear}',${w})" title="${note||'Week '+w+' — click to add note'}"><div class="rm-week-num">W${w}</div>${dots}${note?`<div style="font-size:5px;color:var(--mu2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${note.substring(0,8)}</div>`:''}</div>`;
+  }
+  weekHTML+='</div>';
+
+  // Goals list
+  let goalsHTML=`<div class="wlbl" style="margin-bottom:8px">Year Goals <button class="wact" onclick="addRmGoal('${activeRmYear}')">+ Add Goal</button></div>`;
+  goalsHTML+=rd.goals.map(g=>`<div class="rm-goal-item">
+    <div class="rm-goal-ck${g.done?' dn':''}" onclick="togRmGoal('${activeRmYear}','${g.id}')">${g.done?'✓':''}</div>
+    <div class="rm-goal-tx${g.done?' dn':''}" contenteditable="true" onblur="updRmGoal('${activeRmYear}','${g.id}',this.textContent)">${g.text}</div>
+    <button class="rm-goal-del" onclick="delRmGoal('${activeRmYear}','${g.id}')">✕</button>
+  </div>`).join('');
+
+  // Active series for this year
+  let activeSeriesHTML=`<div class="wlbl" style="margin-bottom:8px">Active Series This Year <button class="wact" onclick="addRmSeries('${activeRmYear}')">+ Add</button></div>`;
+  activeSeriesHTML+=`<div style="display:flex;flex-wrap:wrap;gap:5px">${rd.series.map(s=>{const col=SERIES_COLORS[s]||'var(--mu2)';return`<span class="tag" style="color:${col};border-color:${col}30;cursor:pointer" onclick="rmRemoveSeries('${activeRmYear}','${s}')" title="Click to remove">${s} ×</span>`;}).join('')}</div>`;
+
+  content.innerHTML=`
+    ${summaryHTML}
+    <div class="g2" style="margin-bottom:11px;">
+      <div class="wg sp2">${calHTML}</div>
+    </div>
+    <div class="g2" style="margin-bottom:11px;">
+      <div class="wg sp2">${weekHTML}</div>
+    </div>
+    <div class="g2">
+      <div class="wg rm-goals">${goalsHTML}</div>
+      <div class="wg">${activeSeriesHTML}</div>
+    </div>
+  `;
+}
+
+function setRmYear(key){activeRmYear=key;renderRoadmap();}
+
+function addRoadmapYear(){
+  const years=Object.values(roadmapData).map(d=>d.year);
+  const nextY=years.length?Math.max(...years)+1:1;
+  const type=prompt('Roadmap type (multimedia or fcko):','multimedia');
+  if(!type)return;
+  const key='Y'+nextY+'-'+type.toLowerCase();
+  roadmapData[key]={year:nextY,type:type.toLowerCase(),label:type+' Roadmap',series:[],goals:[],calendar:{},weeklyNotes:{}};
+  activeRmYear=key;
+  renderRoadmap();sched();
+}
+
+function addSeriesChip(key,month){
+  const rd=roadmapData[key];if(!rd)return;
+  const name=prompt('Series name:');if(!name)return;
+  if(!rd.calendar[month])rd.calendar[month]=[];
+  if(!rd.calendar[month].includes(name))rd.calendar[month].push(name);
+  if(!rd.series.includes(name))rd.series.push(name);
+  renderRoadmap();sched();
+}
+
+function removeChipFromMonth(key,month,series,e){
+  e.stopPropagation();
+  const rd=roadmapData[key];if(!rd||!rd.calendar[month])return;
+  rd.calendar[month]=rd.calendar[month].filter(s=>s!==series);
+  renderRoadmap();sched();
+}
+
+function addRmSeries(key){
+  const rd=roadmapData[key];if(!rd)return;
+  const name=prompt('Series name to add this year:');if(!name)return;
+  if(!rd.series.includes(name))rd.series.push(name);
+  renderRoadmap();sched();
+}
+
+function rmRemoveSeries(key,series){
+  const rd=roadmapData[key];if(!rd)return;
+  rd.series=rd.series.filter(s=>s!==series);
+  renderRoadmap();sched();
+}
+
+function editWeekNote(key,week){
+  const rd=roadmapData[key];if(!rd)return;
+  const cur=rd.weeklyNotes['W'+week]||'';
+  const note=prompt(`Week ${week} note:`,cur);
+  if(note===null)return;
+  if(note.trim())rd.weeklyNotes['W'+week]=note.trim();
+  else delete rd.weeklyNotes['W'+week];
+  renderRoadmap();sched();
+}
+
+function togRmGoal(key,gid){
+  const rd=roadmapData[key];if(!rd)return;
+  const g=rd.goals.find(x=>x.id===gid);if(g)g.done=!g.done;
+  renderRoadmap();sched();
+}
+
+function updRmGoal(key,gid,val){
+  const rd=roadmapData[key];if(!rd)return;
+  const g=rd.goals.find(x=>x.id===gid);if(g)g.text=val.trim();
+  sched();
+}
+
+function delRmGoal(key,gid){
+  const rd=roadmapData[key];if(!rd)return;
+  rd.goals=rd.goals.filter(x=>x.id!==gid);
+  renderRoadmap();sched();
+}
+
+function addRmGoal(key){
+  const rd=roadmapData[key];if(!rd)return;
+  rd.goals.push({id:'g'+Date.now(),text:'New goal',done:false});
+  renderRoadmap();sched();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  WEEK ROTATOR
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ROTATION = ['Content','Code','Study','Creative','Writing','Hustle','DEV'];
+const ROT_DESC = {
+  'Content':  'Film, record, and publish. Camera out, stories out.',
+  'Code':     'Build, fix, and ship. Keyboard mode only.',
+  'Study':    'Learn something. Python, herbalism, frequencies — whatever the week calls for.',
+  'Creative': 'Art, design, visuals. Make something that didn\'t exist.',
+  'Writing':  'Scripts, essays, posts, poetry. Words on the page.',
+  'Hustle':   'Outreach, client work, money moves. Business head on.',
+  'DEV':      'Deep work on tools, dashboards, and systems. Dev environment active.'
+};
+const ROT_COLORS = {
+  'Content':'#c8f542','Code':'#00d4aa','Study':'#f0c040',
+  'Creative':'#ff6b35','Writing':'#9b7fd4','Hustle':'#fb923c','DEV':'#00bfff'
+};
+const DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+function getWeekRotation(){
+  // Week 1 of the year starts the cycle from index 0
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+  const weekNum = Math.floor(dayOfYear / 7);
+  // Current day of week (0=Mon)
+  const dayOfWeek = (now.getDay() + 6) % 7; // convert Sun=0 to Mon=0
+  // Each week rotates to next in cycle
+  const cycleStart = weekNum % ROTATION.length;
+  return { cycleStart, dayOfWeek, weekNum };
+}
+
+function renderWeekRotator(){
+  const el = document.getElementById('week-rotator');
+  if(!el) return;
+  const { cycleStart, dayOfWeek, weekNum } = getWeekRotation();
+  const todayFocus = ROTATION[(cycleStart + dayOfWeek) % ROTATION.length];
+  const todayColor = ROT_COLORS[todayFocus];
+  const todayDesc = ROT_DESC[todayFocus];
+
+  // Build 7 day dots
+  const dots = DAYS.map((day, i) => {
+    const focus = ROTATION[(cycleStart + i) % ROTATION.length];
+    const col = ROT_COLORS[focus];
+    const isToday = i === dayOfWeek;
+    return `<div class="wr-dot">
+      <div class="wr-dot-circle${isToday ? ' today' : ''}" style="background:${col}18;border-color:${col}${isToday ? '' : '60'};color:${col}">
+        ${focus.substring(0,3)}
+      </div>
+      <div class="wr-dot-lbl" style="color:${isToday ? col : 'var(--mu)'}">${day}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="week-rot" style="--rot-col:${todayColor}">
+    <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:${todayColor}"></div>
+    <div class="wr-left">
+      <div class="wr-day-label">Today's Focus</div>
+      <div class="wr-day-name" style="color:${todayColor}">${todayFocus}</div>
+      <div class="wr-day-desc">${todayDesc}</div>
+    </div>
+    <div class="wr-center">
+      <div class="wr-week-strip">${dots}</div>
+    </div>
+    <div class="wr-right">
+      <div class="wr-week-num">Week ${weekNum + 1}</div>
+      <div class="wr-cycle-pos">Cycle ${(Math.floor(weekNum / ROTATION.length)) + 1}</div>
+      <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--mu);margin-top:4px;">7-day rotation</div>
+    </div>
+  </div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SAVE / LOAD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+function sched(){clearTimeout(saveTimer);saveTimer=setTimeout(doSave,900);}
+function doSave(){
+  try{
+    localStorage.setItem('hq_main',document.getElementById('mainArea').innerHTML);
+    localStorage.setItem('hq_series',JSON.stringify(seriesList));
+    localStorage.setItem('hq_eps',JSON.stringify(episodes));
+    localStorage.setItem('hq_plts',JSON.stringify(platforms));
+    localStorage.setItem('hq_vids',JSON.stringify(videos));
+    localStorage.setItem('hq_analytics',JSON.stringify(analyticsLog));
+    localStorage.setItem('hq_roadmap',JSON.stringify(roadmapData));
+    flash();
+  }catch(e){}
+}
+function flash(){const el=document.getElementById('sfl');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1400);}
+function loadSaved(){
+  try{
+    const m=localStorage.getItem('hq_main');if(m)document.getElementById('mainArea').innerHTML=m;
+    const s=localStorage.getItem('hq_series');if(s)seriesList=JSON.parse(s);
+    const ep=localStorage.getItem('hq_eps');if(ep)episodes=JSON.parse(ep);
+    const pl=localStorage.getItem('hq_plts');if(pl)platforms=JSON.parse(pl);
+    const v=localStorage.getItem('hq_vids');if(v)videos=JSON.parse(v);
+    const a=localStorage.getItem('hq_analytics');if(a)analyticsLog=JSON.parse(a);
+    const rd=localStorage.getItem('hq_roadmap');if(rd)roadmapData=JSON.parse(rd);
+    if(!localStorage.getItem('hq_roadmap'))seedRoadmap();
+    renderSeriesGrid();renderVids();renderCommand();
+  }catch(e){}
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━
+document.addEventListener('input',e=>{if(e.target.contentEditable==='true')sched();});
+document.querySelector('[data-tab="command"]').classList.add('a0');
+loadSaved();
+updDone();
+renderWeekRotator();
+</script>
+</body>
+</html>
